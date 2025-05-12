@@ -1,0 +1,12 @@
+.env
+
+.idea/
+__pycache__/
+
+docker-compose.yml
+Dockerfile.dev
+
+pyproject.toml
+
+*.json
+app/agent_prompts/custom_prompt.py
