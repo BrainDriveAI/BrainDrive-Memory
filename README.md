@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A personal knowledge management system powered by AI that helps you store, organize, and have meaningful conversations with your documents and knowledge.
+Your personal AI memory assistant. Unlike basic RAG systems, BrainDrive memory forms connections and updates information like a human mind. The more you use it, the better it knows you, and the more helpful it becomes. It’s modular by design, and because it’s BrainDrive, you own and control your memory, not Big Tech.
 
 ## 🌟 Features
 
