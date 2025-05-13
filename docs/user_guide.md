@@ -23,6 +23,7 @@ Unlike typical RAG (Retrieval-Augmented Generation) systems, BrainDrive Memory i
 - **Personalized Knowledge Graph**: Information is organized in a connected graph database that preserves relationships
 - **Document Integration**: Upload documents to instantly enhance your knowledge base
 - **Customizable Memory Behavior**: Define what types of information should be remembered and how
+- **Modular & Under Your Control**: Swap out data sources, storage systems, or language models as you see fit.
 
 ## Getting Started
 
@@ -56,7 +57,7 @@ http://localhost:8501
 
 ### Through Conversation
 
-The most natural way to build your digital brain is through conversation. As you chat with the agent:
+The most natural way to build your personalized memory is through conversation. As you chat with the agent:
 
 1. It automatically identifies important facts, concepts, and relationships
 2. These are stored in your knowledge graph without requiring explicit commands
@@ -85,12 +86,12 @@ To quickly expand your knowledge base with existing content:
 
 ### Sample Queries
 
-Here are examples of how to interact with your digital brain:
+Here are examples of how to interact with your personlized memory:
 
 **Basic Information Retrieval**:
 - "What do I know about machine learning?"
 - "Tell me about my upcoming travel plans."
-- "What did I say about the marketing strategy last week?"
+- "What did I say about our marketing strategy last week?"
 
 **Document-Specific Questions**:
 - "What does my insurance policy say about flood coverage?"
@@ -198,7 +199,7 @@ For business use:
 
 ## Tips and Best Practices
 
-### For Building a Better Digital Brain
+### For Building a Better Personalized Memory
 
 - **Have regular conversations** with the agent to build your knowledge base organically
 - **Upload diverse documents** to create a rich foundation of knowledge
@@ -222,7 +223,7 @@ For business use:
 
 - Occasionally ask "What do you know about X?" to verify stored information
 - Update information when it changes
-- Use the system regularly to keep your digital brain current
+- Use the system regularly to keep your memory current
 
 ## Troubleshooting
 
