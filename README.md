@@ -18,19 +18,41 @@ Modular, ownable AI memory that gets smarter with every conversation.
 
 ## 📋 Architecture
 
-Memory AI Agent combines multiple technologies to create a comprehensive personal knowledge management system:
+BrainDrive Memory is designed to be modular, provider-agnostic, and fully ownable. It’s built around four core components:
 
-- **Frontend**: Streamlit-based chat interface
-- **Backend**: Python with LangChain, LangGraph for agent reasoning
-- **Data Storage**:
-  - Neo4j graph database for structured data and relationships
-  - Supabase vector store for semantic search
-  - Google Cloud Storage for document storage
-- **AI Services**:
-  - OpenAI APIs for language model capabilities
-  - Document parsing with LLMSherpa
-  - Google Vertex AI Search integration
-  - Multiple embeddings model options
+### 🧠 AI Agent
+- Coordinates memory operations
+- Decides what to remember, update, or retrieve
+- Interacts with data sources through natural language
+- Built with [LangGraph](https://www.langgraph.dev/) and customizable system prompts
+
+### 🗂️ Data Sources
+- **Vector Store** – Fast retrieval using embeddings (default: Supabase, swappable)
+- **Knowledge Graph** – Connects entities and facts like neural links (default: Neo4j, swappable)
+- **Document Storage** – Stores uploaded files (default: Google Cloud Storage, swappable)
+- **Other Sources** – Easily integrate calendars, emails, databases, etc.
+
+### 🔄 Tools Layer
+- Encapsulated tools for `add`, `delete`, `update`, `search`, and `summarize`
+- Modular: Add or remove tools based on your needs
+- Tools interact with all data sources through a unified manager
+
+### 🧩 Presentation Layer
+- Interfaces for interacting with the memory agent:
+  - Web UI (Streamlit-based)
+  - REST API
+  - LangGraph visual/debug interface
+  - CLI (coming soon)
+- Built to support custom interfaces via plugin or API
+
+### ⚙️ Designed for Modularity
+All major components — LLMs, vector stores, graph databases, storage providers — are wrapped in adapters. You can:
+
+- Swap providers without rewriting core logic
+- Add new data sources or tools easily
+- Configure system behavior via a centralized `settings.py` file
+
+The result: a flexible, extensible memory system you can shape to your needs.
 
 ## 🚀 Getting Started
 
