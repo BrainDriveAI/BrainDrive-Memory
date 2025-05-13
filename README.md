@@ -6,12 +6,15 @@ Modular, ownable AI memory that gets smarter with every conversation.
 
 ## 🌟 Features
 
-- **Powerful Document Processing**: Upload PDFs and extract meaningful information using advanced layout parsing
-- **Multi-Modal Data Storage**: Utilizes both graph database (Neo4j) and vector database (Supabase) for rich knowledge representation
-- **Conversational AI Interface**: Chat with your data using natural language
-- **Advanced Retrieval**: Combines graph-based knowledge and semantic search for accurate information retrieval
-- **Google OAuth Authentication**: Secure login using Google accounts
-- **Multi-Model LLM Support**: Compatible with various AI model providers including OpenAI, Groq, TogetherAI, and more
+- **Persistent AI Memory** – Learns from your conversations and documents, not just prompts  
+- **Knowledge Graph Integration** – Forms and updates connections between concepts like a human mind  
+- **Modular Architecture** – Easily swap vector stores, graph DBs, LLMs, or add your own data sources  
+- **Document-Aware Chat** – Seamlessly integrates uploaded files into memory and responses  
+- **Smart Agent Control** – Automatically decides what to remember, update, or reference  
+- **Customizable Prompts** – Tailor system behavior to fit your tone, tools, and goals  
+- **LLM Agnostic** – Works with GPT-4, Claude, Ollama, and other supported models  
+- **Open-Source & MIT Licensed** – Full freedom to use, modify, and extend  
+- **Own Your Data** – Memory stays with you — not Big Tech
 
 ## 📋 Architecture
 
