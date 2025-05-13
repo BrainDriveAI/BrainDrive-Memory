@@ -12,7 +12,7 @@ Modular, ownable AI memory that gets smarter with every conversation.
 - **Document-Aware Chat** – Seamlessly integrates uploaded files into memory and responses  
 - **Smart Agent Control** – Automatically decides what to remember, update, or reference  
 - **Customizable Prompts** – Tailor system behavior to fit your tone, tools, and goals  
-- **LLM Agnostic** – Works with GPT-4, Claude, Ollama, and other supported models  
+- **LLM Agnostic** – Works with GPT-4, Claude, Ollama, etc
 - **Open-Source & MIT Licensed** – Full freedom to use, modify, and extend  
 - **Own Your Data** – Memory stays with you — not Big Tech
 
