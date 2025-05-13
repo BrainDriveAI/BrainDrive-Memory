@@ -246,7 +246,7 @@ For issues with document uploads:
 
 - If the application becomes unresponsive, refresh the page
 - If logged out unexpectedly, simply log back in
-- For persistent issues, check application logs or contact support
+- For persistent issues, check application logs or [post in the support forum](https://community.braindrive.ai/c/support-help/14).
 
 ---
 
