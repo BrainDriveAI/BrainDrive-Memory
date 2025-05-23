@@ -1,6 +1,8 @@
 # BrainDrive Memory - Your Personal AI Memory Agent
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+![Setup Required](https://img.shields.io/badge/setup-required-red)
+![Config Required](https://img.shields.io/badge/.env-required-orange)
 
 Modular, ownable AI memory that gets smarter with every conversation.
 
@@ -15,6 +17,61 @@ Modular, ownable AI memory that gets smarter with every conversation.
 - **LLM Agnostic** – Works with GPT-4, Claude, Ollama, etc
 - **Open-Source & MIT Licensed** – Full freedom to use, modify, and extend  
 - **Own Your Data** – Memory stays with you — not Big Tech
+
+## 🚀 Quick Start (for experienced developers)
+
+> ⚠️ **Important**: Follow ALL steps below. Skipping the .env setup will cause the application to fail.
+
+### Prerequisites
+- Python 3.9+
+- Docker and Docker Compose (optional, for containerized setup)
+- Google Cloud account (for GCS, OAuth, and Vertex AI Search)
+- Neo4j database
+- Supabase account
+- OpenAI API key
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/BrainDriveAI/BrainDrive-Memory.git
+   cd BrainDrive-Memory
+   ```
+
+2. **Create a virtual environment**
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+
+3. **Install dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **⚠️ REQUIRED: Configure environment variables**
+   ```bash
+   cp .env.example .env
+   ```
+   **You MUST edit the `.env` file with your API keys before proceeding.**
+   
+   Open `.env` and set at minimum:
+   - `OPENAI_API_KEY`
+   - `NEO4J_URL`, `NEO4J_USER`, `NEO4J_PWD`
+   - `SUPABASE_URL`, `SUPABASE_KEY`
+   - `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`
+   - `GCS_BUCKET_NAME`
+   
+   **The app will not start without these values configured.**
+
+5. **Run the application**
+   ```bash
+   streamlit run main.py
+   ```
+
+### Need Help?
+- **First time setup?** Follow our [detailed installation guide](docs/installation.md)
+- **Configuration issues?** See the [configuration guide](docs/configuration.md)
 
 ## 📋 Architecture
 
@@ -53,46 +110,6 @@ All major components — LLMs, vector stores, graph databases, storage providers
 - Configure system behavior via a centralized `settings.py` file
 
 The result: a flexible, extensible memory system you can shape to your needs.
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Python 3.9+
-- Docker and Docker Compose (optional, for containerized setup)
-- Google Cloud account (for GCS, OAuth, and Vertex AI Search)
-- Neo4j database
-- Supabase account
-- OpenAI API key
-
-### Installation
-
-1. Clone the repository
-   ```bash
-   git clone https://github.com/BrainDriveAI/BrainDrive-Memory.git
-   cd BrainDrive-Memory
-   ```
-
-2. Create a virtual environment and install dependencies
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   pip install -r requirements.txt
-   ```
-
-3. Set up environment variables by copying the example file
-   ```bash
-   cp .env.example .env
-   ```
-
-4. Edit the `.env` file with your API keys and configuration
-
-5. Run the application
-   ```bash
-   streamlit run main.py
-   ```
-
-See the [installation guide](docs/installation.md) for a complete installation setup.
 
 ## 🔧 Configuration
 
