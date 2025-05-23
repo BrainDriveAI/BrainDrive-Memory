@@ -107,7 +107,7 @@ All major components — LLMs, vector stores, graph databases, storage providers
 
 - Swap providers without rewriting core logic
 - Add new data sources or tools easily
-- Configure system behavior via a centralized `settings.py` file
+- Configure system behavior via a centralized `app/settings.py` file
 
 The result: a flexible, extensible memory system you can shape to your needs.
 
@@ -150,6 +150,17 @@ braindrive-memory/
 ## 🤝 Contributing
 
 Contributions are welcome! Please see [CONTRIBUTING.md](docs/contributing.md) for guidelines.
+
+## 📚 Documentation
+
+For comprehensive guides, technical details, and contribution information, visit our **[documentation folder](docs/readme.md)**.
+
+**Quick Links:**
+- 📖 [Complete Installation Guide](docs/installation.md) - Detailed setup instructions
+- 🏗️ [Architecture Overview](docs/architecture.md) - System design and components  
+- ⚙️ [Configuration Reference](docs/configuration.md) - All configuration options
+- 👥 [Contributing Guidelines](docs/contributing.md) - How to contribute
+- 📱 [User Guide](docs/user_guide.md) - How to use the application
 
 ## 📄 License
 
