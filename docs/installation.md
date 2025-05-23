@@ -1,10 +1,8 @@
 # Installation Guide
-
 This guide will walk you through setting up the BrainDrive Memory application for development or production use.
 
 ## Prerequisites
-
-Before installing Memory AI Agent, ensure you have the following:
+Before installing BrainDrive Memory AI Agent, ensure you have the following:
 - Python 3.9 or higher
 - Git
 - Neo4j database (cloud or self-hosted)
@@ -14,16 +12,13 @@ Before installing Memory AI Agent, ensure you have the following:
 - Docker and Docker Compose (optional, for containerized deployment)
 
 ## Step 1: Clone the Repository
-
 ```bash
 git clone https://github.com/BrainDriveAI/BrainDrive-Memory.git
 cd BrainDrive-Memory
 ```
 
 ## Step 2: Python Environment Setup
-
 ### Option 1: Using venv (Recommended for development)
-
 ```bash
 # Create a virtual environment
 python -m venv venv
@@ -31,6 +26,7 @@ python -m venv venv
 # Activate the virtual environment
 # On Windows:
 venv\Scripts\activate
+
 # On macOS/Linux:
 source venv/bin/activate
 
@@ -39,7 +35,6 @@ pip install -r requirements.txt
 ```
 
 ### Option 2: Using Conda
-
 ```bash
 # Create a conda environment from the environment.yml file
 conda env create -f environment.yml
@@ -49,7 +44,6 @@ conda activate braindrive-memory-env
 ```
 
 ## Step 3: Configuration
-
 1. Create a `.env` file in the project root:
    ```bash
    cp .env.example .env
@@ -61,11 +55,10 @@ conda activate braindrive-memory-env
    - Supabase credentials (if using vector storage)
    - Google Cloud credentials (for OAuth and GCS)
 
-See the [Configuration Guide](configuration.md) for detailed information on all available settings.
+See the [Configuration Guide](configuration.md){:target="_blank"} for detailed information on all available settings.
 
 ## Step 4: Set Up Google OAuth
-
-1. Go to the [Google Cloud Console](https://console.cloud.google.com/)
+1. Go to the <a href="https://console.cloud.google.com/" target="_blank">Google Cloud Console</a>
 2. Create a new project or select an existing one
 3. Navigate to "APIs & Services" > "Credentials"
 4. Click "Create Credentials" > "OAuth client ID"
@@ -76,34 +69,29 @@ See the [Configuration Guide](configuration.md) for detailed information on all 
 7. Copy the Client ID and Client Secret to your `.env` file
 
 ## Step 5: Set Up Neo4j
-
 ### Option 1: Neo4j Aura (Cloud)
-1. Create an account at [Neo4j Aura](https://neo4j.com/cloud/aura/)
+1. Create an account at <a href="https://neo4j.com/cloud/aura/" target="_blank">Neo4j Aura</a>
 2. Create a new database
 3. Copy the connection details to your `.env` file
 
 ### Option 2: Self-hosted Neo4j
-1. Install Neo4j from [Neo4j Download Center](https://neo4j.com/download/)
+1. Install Neo4j from <a href="https://neo4j.com/download/" target="_blank">Neo4j Download Center</a>
 2. Create a new database and set a password
 3. Enable the necessary plugins (APOC, GDS, Vector)
 4. Update your `.env` file with the connection details
 
 ## Step 6: Set Up Google Cloud Storage
-
 1. Create a bucket in Google Cloud Storage
 2. Set up appropriate permissions
 3. Add the bucket name to your `.env` file
 
 ## Step 7: Deploy LLMSherpa (Optional)
-
 To use your own instance setup nlm-ingestor to get llmsherpa_api_url:
-1. Deploy LLMSherpa using the instructions from [nlm-ingestor](https://github.com/nlmatics/nlm-ingestor)
+1. Deploy LLMSherpa using the instructions from <a href="https://github.com/nlmatics/nlm-ingestor" target="_blank">nlm-ingestor</a>
 2. Set `LLM_SHERPA_API_URL` to your `.env` file 
 
 ## Step 8: Running the Application
-
 ### Local Development
-
 ```bash
 # Run with Streamlit directly
 streamlit run main.py
@@ -112,9 +100,7 @@ streamlit run main.py
 The application will be available at `http://localhost:8501/`
 
 ### Docker Deployment
-
 #### Quick Development Setup
-
 ```bash
 # Build the development container
 docker build -f Dockerfile -t memory-agent-dev .
@@ -124,12 +110,11 @@ docker run -p 8501:8501 memory-agent-dev
 ```
 
 #### Production Deployment
-
 Build and deploy to Google Cloud Run.
+
 We provide automated deployment scripts for all major platforms:
 
 ##### For Linux/Mac Users:
-
 1. Make the script executable:
    ```bash
    chmod +x deploy.sh
@@ -147,7 +132,6 @@ We provide automated deployment scripts for all major platforms:
    ```
 
 ##### For Windows Users:
-
 1. Edit the PowerShell script to set your Google Cloud account:
    ```powershell
    notepad deploy.ps1
@@ -160,7 +144,6 @@ We provide automated deployment scripts for all major platforms:
    ```
 
 ##### What the Deployment Scripts Do:
-
 1. Authenticate with Google Cloud
 2. Set required environment variables
 3. Build the Docker image for x86_64 architecture
@@ -168,7 +151,6 @@ We provide automated deployment scripts for all major platforms:
 5. Report deployment success
 
 ##### Manual Deployment Steps
-
 If you prefer to deploy manually or to a different cloud provider:
 
 1. Build the Docker image:
@@ -184,7 +166,6 @@ If you prefer to deploy manually or to a different cloud provider:
 3. Deploy using your cloud provider's container service
 
 ##### Environment Configuration
-
 The following environment variables can be configured for deployment:
 - `GCLOUD_PROJECT`: Your Google Cloud project ID
 - `REPO`: Repository name in Artifact Registry
@@ -192,14 +173,12 @@ The following environment variables can be configured for deployment:
 - `IMAGE`: Container image name
 
 ## Step 9: Verify Installation
-
 1. Open your browser and navigate to `http://localhost:8501/`
 2. You should see the login page
 3. Sign in with your Google account
 4. You should now see the chat interface
 
 ## Troubleshooting
-
 ### Authentication Errors
 - Ensure that your Google Cloud OAuth credentials are correctly configured
 - Check that the redirect URI matches exactly what's in your Google Cloud Console
@@ -227,5 +206,5 @@ The following environment variables can be configured for deployment:
 - Make sure the repository exists in Google Artifact Registry
 
 ## Next Steps
-- See the [User Guide](user_guide.md) for information on using the application
-- Review [Contributing Guidelines](contributing.md) if you want to contribute to the project
+- See the [User Guide](user_guide.md){:target="_blank"} for information on using the application
+- Review [Contributing Guidelines](contributing.md){:target="_blank"} if you want to contribute to the project
