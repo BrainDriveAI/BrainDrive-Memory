@@ -1,6 +1,6 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field, HttpUrl, SecretStr, ValidationError
-from typing import Optional
+from typing import Optional, Literal
 import logging
 
 logger = logging.getLogger(__name__)
@@ -34,10 +34,16 @@ class AppSettings(BaseSettings):
     ENABLE_AUTH: Optional[bool] = Field(default=False, description="Enable Google OAuth authentication.")
     ENABLE_FILE_UPLOAD: Optional[bool] = Field(default=False, description="Enable PDF file upload and processing functionality.")
 
+    # -- Embedding provider selection --
+    EMBEDDING_PROVIDER: Literal['openai', 'pinecone', 'ollama'] = Field(
+        default='pinecone',
+        description="Which embedding provider to use: openai, pinecone, or ollama."
+    )
+
     # OpenAI
-    OPENAI_API_KEY: SecretStr = Field(..., description="Your OpenAI API Key.")
-    OPENAI_LLM_MODEL: str = Field(default="gpt-4.1", description="The OpenAI LLM model to be used.")
-    OPENAI_EMBEDDING_MODEL: str = Field(default="text-embedding-3-small", description="The OpenAI embedding model to be used.")
+    OPENAI_API_KEY: Optional[SecretStr] = Field(..., description="Your OpenAI API Key.")
+    OPENAI_LLM_MODEL: Optional[str] = Field(default="gpt-4.1", description="The OpenAI LLM model to be used.")
+    OPENAI_EMBEDDING_MODEL: Optional[str] = Field(default="text-embedding-3-small", description="The OpenAI embedding model to be used.")
 
     # Groq
     GROQ_API_KEY: Optional[SecretStr] = Field(default=None, description="Your Groq API Key.")
@@ -45,7 +51,7 @@ class AppSettings(BaseSettings):
 
     # Ollama
     OLLAMA_EMBEDDING_MODEL: Optional[str] = Field(default="mxbai-embed-large", description="The Ollama embedding model to be used.")
-    # OLLAMA_BASE_URL: Optional[HttpUrl] = Field(default=None, description="Ollama base URL if self-hosted and not using the default.")
+    OLLAMA_BASE_URL: Optional[HttpUrl] = Field(default=None, description="Ollama base URL if self-hosted and not using the default.")
 
     # Pinecone
     PINECONE_API_KEY: Optional[SecretStr] = Field(default=None, description="Your Pinecone API Key.")

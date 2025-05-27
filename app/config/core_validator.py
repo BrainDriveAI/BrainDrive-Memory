@@ -34,4 +34,39 @@ def validate_core_configuration() -> List[Dict[str, str]]:
             "fix": "Configure NEO4J_URL, NEO4J_USER, and NEO4J_PWD in your .env file."
         })
 
+    # Embedding provider checks:
+    provider = app_env.EMBEDDING_PROVIDER
+    if provider == 'openai':
+        if not app_env.OPENAI_API_KEY or not app_env.OPENAI_EMBEDDING_MODEL:
+            issues.append({
+                'message': "OpenAI embedding provider selected but OPENAI_API_KEY or OPENAI_EMBEDDING_MODEL is missing.",
+                'details': "Set OPENAI_API_KEY or OPENAI_EMBEDDING_MODEL in your .env.",
+                'fix': "Add OPENAI_API_KEY or OPENAI_EMBEDDING_MODEL to .env file."
+            })
+    elif provider == 'pinecone':
+        if not app_env.PINECONE_API_KEY or not app_env.PINECONE_EMBEDDING_MODEL:
+            missing = []
+            if not app_env.PINECONE_API_KEY:
+                missing.append('PINECONE_API_KEY')
+            if not app_env.PINECONE_EMBEDDING_MODEL:
+                missing.append('PINECONE_EMBEDDING_MODEL')
+            issues.append({
+                'message': "Pinecone embedding provider selected but missing: " + ", ".join(missing),
+                'details': f"Missing: {', '.join(missing)}.",
+                'fix': "Add the missing Pinecone vars to your .env."
+            })
+    elif provider == 'ollama':
+        if not app_env.OLLAMA_API_BASE or not app_env.OLLAMA_EMBEDDING_MODEL:
+            issues.append({
+                'message': "Ollama embedding provider selected but OLLAMA_BASE_URL or OLLAMA_EMBEDDING_MODEL is missing.",
+                'details': "Set OLLAMA_BASE_URL orOLLAMA_EMBEDDING_MODEL in your .env.",
+                'fix': "Add OLLAMA_BASE_URL orOLLAMA_EMBEDDING_MODEL to .env file."
+            })
+    else:
+        issues.append({
+            'message': f"Unknown embedding provider '{provider}'.",
+            'details': "Valid options are: openai, pinecone, ollama.",
+            'fix': "Set EMBEDDING_PROVIDER to one of the valid options."
+        })
+
     return issues
