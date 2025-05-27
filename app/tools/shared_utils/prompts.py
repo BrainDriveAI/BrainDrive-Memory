@@ -1,4 +1,4 @@
-from app.app_env import app_env
+from app.config.app_env import app_env
 
 SYSTEM_PROMPT = f"""
 ### System Prompt for BrainDrive Memory AI Agent

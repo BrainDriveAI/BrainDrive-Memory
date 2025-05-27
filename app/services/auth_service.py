@@ -3,7 +3,7 @@ import streamlit as st
 from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
 from dotenv import load_dotenv
-from app.app_env import app_env
+from app.config.app_env import app_env
 
 load_dotenv()
 

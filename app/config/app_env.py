@@ -7,6 +7,11 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+class CriticalConfigError(Exception):
+    """Custom exception for critical configuration failures."""
+    pass
+
+
 class AppSettings(BaseSettings):
     """
     Application settings loaded from environment variables and .env file.
@@ -25,6 +30,10 @@ class AppSettings(BaseSettings):
         description="Default username for the application if no specific user context is available. "
                     "For multi-user scenarios, this may be overridden by the authenticated user ID."
     )
+
+    # Feature toggles
+    ENABLE_AUTH: Optional[bool] = Field(default=False, description="Enable Google OAuth authentication.")
+    ENABLE_FILE_UPLOAD: Optional[bool] = Field(default=False, description="Enable PDF file upload and processing functionality.")
 
     # OpenAI
     OPENAI_API_KEY: SecretStr = Field(..., description="Your OpenAI API Key.")
@@ -54,8 +63,7 @@ class AppSettings(BaseSettings):
     TOGETHER_AI_LLM_MODEL: Optional[str] = Field(default="meta-llama/Meta-Llama-3.1-405B-Instruct-Turbo", description="The TogetherAI LLM model to be used.")
 
     # Neo4j
-    NEO4J_URL: str = Field(...,
-                           description="The Neo4j connection URL (e.g., 'neo4j+s://xxxx.databases.neo4j.io').")
+    NEO4J_URL: str = Field(..., description="The Neo4j connection URL (e.g., 'neo4j+s://xxxx.databases.neo4j.io').")
     NEO4J_USER: str = Field(..., description="The Neo4j username.")
     NEO4J_PWD: SecretStr = Field(..., description="The Neo4j password.")
     NEO4J_DATABASE: str = Field(default="neo4j", description="The Neo4j database name.")
@@ -63,17 +71,16 @@ class AppSettings(BaseSettings):
     # PGVector / Supabase (using SUPABASE_ prefix for clarity)
     SUPABASE_URL: Optional[str] = Field(default=None, description="The Supabase connection URL (e.g., 'postgresql://user:pass@host:port/dbname').")
     SUPABASE_KEY: Optional[SecretStr] = Field(default=None, description="The Supabase service role key or anon key.")
-    SUPABASE_VECTOR_COLLECTION_NAME: str = Field(default="documents", description="The collection/table name for the vector store in Supabase.")
-    SUPABASE_VECTOR_QUERY_FUNCTION_NAME: str = Field(default="match_documents", description="The query function name in Supabase to search for documents.")
+    SUPABASE_VECTOR_COLLECTION_NAME: Optional[str] = Field(default="documents", description="The collection/table name for the vector store in Supabase.")
+    SUPABASE_VECTOR_QUERY_FUNCTION_NAME: Optional[str] = Field(default="match_documents", description="The query function name in Supabase to search for documents.")
 
-    # LLM Sherpa
-    LLM_SHERPA_API_URL: str = Field(default=None, description="The LLM sherpa API endpoint (e.g., 'http://localhost:5010/api/parseDocument?renderFormat=all').")
+    # LLM Sherpa (only needed if file upload is enabled)
+    LLM_SHERPA_API_URL: Optional[HttpUrl] = Field(default=None, description="The LLM sherpa API endpoint (e.g., 'http://localhost:5010/api/parseDocument?renderFormat=all').")
 
-    # Google Cloud Storage
+    # Google Cloud Storage (only needed if file upload is enabled)
     GCS_BUCKET_NAME: Optional[str] = Field(default=None, description="The Google Cloud Storage bucket name.")
 
-    # Google OAuth (from auth.py, ensuring they are loaded from env)
-    ENABLE_AUTH: Optional[bool] = Field(default=False, description="Enable Google OAuth authentication.")
+    # Google OAuth (only needed if auth is enabled)
     GOOGLE_CLIENT_ID: Optional[str] = Field(default=None, description="Your Google OAuth Client ID.")
     GOOGLE_CLIENT_SECRET: Optional[SecretStr] = Field(default=None, description="Your Google OAuth Client Secret.")
     REDIRECT_URI: Optional[HttpUrl] = Field(default=None, description="The Google OAuth Redirect URI configured in your Google Cloud Console.")
@@ -97,11 +104,15 @@ except ValidationError as e:
         message = error['msg']
         error_messages.append(f"  - Field '{field}': {message}")
 
-    logger.error("😱 Environment variable validation failed!\n" + "\n".join(error_messages))
+    full_error_message = "😱 Environment variable validation failed!\n" + "\n".join(error_messages) + \
+                         "\nPlease check the logs and your .env file or environment settings."
+    logger.error(full_error_message)
 
     # Exit the application with an error code
-    sys.exit(
-        "Configuration Error: Invalid or missing environment variables. Please check the logs and your .env file or environment settings.")
+    # sys.exit(
+    #     "Configuration Error: Invalid or missing environment variables. Please check the logs and your .env file or environment settings.")
+    # Re-raise a custom error
+    raise CriticalConfigError(full_error_message) from e
 
 # To access: from app.app_env import app_env
 # e.g., app_env.OPENAI_API_KEY.get_secret_value()

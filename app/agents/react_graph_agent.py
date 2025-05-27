@@ -1,7 +1,7 @@
 from langgraph.prebuilt import create_react_agent
 from langchain.schema import SystemMessage
 
-from app.app_env import app_env
+from app.config.app_env import app_env
 from app.adapters.llm_adapter import search_llm_provider
 from app.agent_prompts.default_prompt import system_prompt
 from app.utils.get_current_date import get_current_datetime_cranford
@@ -26,9 +26,9 @@ tools = [
 agent_system_prompt = f"""
     {system_prompt}
     ---
-    Current date and time in Cranford, NJ: {get_current_datetime_cranford()}
+    Current date and time: {get_current_datetime_cranford()}
     ---
-    Refer to user by this name:  {app_env.APP_USERNAME}
+    Refer to the user as:  {app_env.APP_USERNAME.capitalize()}
 """
 
 graph = create_react_agent(search_llm_provider, tools=tools, state_modifier=SystemMessage(content=agent_system_prompt))

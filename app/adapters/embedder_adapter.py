@@ -2,7 +2,7 @@ from langchain_pinecone import PineconeEmbeddings
 import os
 from dotenv import load_dotenv
 
-from app.app_env import app_env
+from app.config.app_env import app_env
 
 load_dotenv()
 

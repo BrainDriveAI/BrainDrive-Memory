@@ -2,7 +2,7 @@ import json
 import time
 import concurrent.futures
 from app.tools.shared_utils.search_graph_db import search_graph_db_by_query
-from app.app_env import app_env
+from app.config.app_env import app_env
 from typing import Optional, Type
 from langchain_core.tools import tool
 from app.data_source_manager import get_vector_store_instance

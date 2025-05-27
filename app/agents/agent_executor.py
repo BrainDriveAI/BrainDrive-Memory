@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field
 from langchain.schema import AIMessage, HumanMessage
 from langchain_core.utils.function_calling import convert_to_openai_function
 
-from app.app_env import app_env
+from app.config.app_env import app_env
 from app.adapters.llm_adapter import search_llm_provider
 from app.agent_prompts.custom_prompt import system_prompt
 from app.utils.get_current_date import get_current_datetime_cranford

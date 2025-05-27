@@ -3,7 +3,7 @@ from app.tools.shared_utils.search_graph_db import search_graph_db
 from app.tools.shared_utils.get_deleted_entities import get_delete_entities_from_search_output
 from app.tools.shared_utils.delete_entities import delete_entities
 from app.tools.update.update_graph import process_and_update
-from app.app_env import app_env
+from app.config.app_env import app_env
 from app.data_source_manager import get_vector_store_instance
 
 from typing import Optional, Type, List

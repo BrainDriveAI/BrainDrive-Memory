@@ -8,7 +8,7 @@ from app.adapters.graph_db_adapter import Neo4jAdapter
 from app.adapters.vector_store_adapter import SupabaseVectorStoreAdapter
 from app.adapters.vertex_ai_search_adapter import VertexAISearchAdapter
 from app.settings import GRAPH_DB_PROVIDER, VECTOR_STORE_PROVIDER
-from app.app_env import app_env
+from app.config.app_env import app_env
 from langchain_core.documents import Document
 
 logger = logging.getLogger(__name__)
