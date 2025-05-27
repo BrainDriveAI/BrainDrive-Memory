@@ -7,24 +7,29 @@ from app.app_env import app_env
 
 load_dotenv()
 
+# Authentication toggle - can be controlled via environment variable
+AUTH_ENABLED = app_env.ENABLE_AUTH
+
 # Google OAuth configuration
 # Now primarily sourced from app_env, which loads from .env or environment
 CLIENT_CONFIG = {
     "web": {
-        "client_id": app_env.GOOGLE_CLIENT_ID,
-        "client_secret": app_env.GOOGLE_CLIENT_SECRET.get_secret_value() if app_env.GOOGLE_CLIENT_SECRET else None,
+        "client_id": app_env.GOOGLE_CLIENT_ID if AUTH_ENABLED else None,
+        "client_secret": app_env.GOOGLE_CLIENT_SECRET.get_secret_value() if (AUTH_ENABLED and app_env.GOOGLE_CLIENT_SECRET) else None,
         "auth_uri": "https://accounts.google.com/o/oauth2/auth",
         "token_uri": "https://oauth2.googleapis.com/token",
-        "redirect_uris": [str(app_env.REDIRECT_URI)] if app_env.REDIRECT_URI else ["http://localhost:8501/"],
+        "redirect_uris": [str(app_env.REDIRECT_URI)] if (AUTH_ENABLED and app_env.REDIRECT_URI) else ["http://localhost:8501/"],
     }
 }
 
 # Scopes define what information we want to access
 SCOPES = ["https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile", "openid"]
 
-
 def create_flow():
     """Create and configure the OAuth flow"""
+    if not AUTH_ENABLED:
+        return None
+    
     flow = Flow.from_client_config(
         client_config=CLIENT_CONFIG,
         scopes=SCOPES,
@@ -32,9 +37,11 @@ def create_flow():
     )
     return flow
 
-
 def get_user_info(credentials):
     """Get user info from Google API using the provided credentials"""
+    if not AUTH_ENABLED:
+        return {"name": "Local User", "email": "user@localhost"}
+    
     try:
         service = build('oauth2', 'v2', credentials=credentials)
         user_info = service.userinfo().get().execute()
@@ -43,14 +50,26 @@ def get_user_info(credentials):
         st.error(f"Error getting user info: {e}")
         return None
 
-
 def is_authenticated():
     """Check if the user is authenticated"""
+    if not AUTH_ENABLED:
+        return True  # Always authenticated when auth is disabled
     return "credentials" in st.session_state
-
 
 def authenticate():
     """Main authentication flow controller"""
+    # If auth is disabled, always allow access
+    if not AUTH_ENABLED:
+        # Set up a mock user session for consistency
+        if "user_info" not in st.session_state:
+            st.session_state.user_info = {
+                "name": "Local User", 
+                "email": "user@localhost",
+                "picture": None
+            }
+        return True
+    
+    # Original auth logic for when AUTH_ENABLED is True
     if "credentials" not in st.session_state:
         # Start OAuth flow
         flow = create_flow()
@@ -81,7 +100,7 @@ def authenticate():
                 return False
         else:
             # Generate authorization URL and redirect user
-            auth_url, _ = flow.authorization_url(
+            auth_url, state = flow.authorization_url(
                 access_type='offline',
                 include_granted_scopes='true',
                 prompt='consent'
@@ -115,7 +134,7 @@ def authenticate():
                                 <path d="M9 3.48c1.69 0 2.83.73 3.48 1.34l2.54-2.48C13.46.89 11.43 0 9 0 5.48 0 2.44 2.02.96 4.96l2.91 2.26C4.6 5.05 6.62 3.48 9 3.48z" fill="#EA4335"></path>
                                 <path d="M17.64 9.2c0-.74-.06-1.28-.19-1.84H9v3.34h4.96c-.1.83-.64 2.08-1.84 2.92l2.84 2.2c1.7-1.57 2.68-3.88 2.68-6.62z" fill="#4285F4"></path>
                                 <path d="M3.88 10.78A5.54 5.54 0 0 1 3.58 9c0-.62.11-1.22.29-1.78L.96 4.96A9.008 9.008 0 0 0 0 9c0 1.45.35 2.82.96 4.04l2.92-2.26z" fill="#FBBC05"></path>
-                                <path d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.84-2.2c-.76.53-1.78.9-3.12.9-2.38 0-4.4-1.57-5.12-3.74L.97 13.04C2.45 15.98 5.48 18 9 18z" fill="#34A853"></path>
+                                <path d="M9 18c2.43 0 4.47-.8 5.96-2.18l2.84-2.2c-.76.53-1.78.9-3.12.9-2.38 0-4.4-1.57-5.12-3.74L.97 13.04C2.45 15.98 5.48 18 9 18z" fill="#34A853"></path>
                                 <path fill="none" d="M0 0h18v18H0z"></path>
                             </g>
                         </svg>
@@ -129,16 +148,17 @@ def authenticate():
     
     return True
 
-
 def logout_user():
     """Function that actually does the logout operation"""
+    if not AUTH_ENABLED:
+        return  # No logout needed when auth is disabled
+    
     for key in list(st.session_state.keys()):
         if key in ['credentials', 'user_info']:
             del st.session_state[key]
     
     # Set a flag to trigger a rerun after the callback completes
     st.session_state.do_rerun = True
-
 
 def display_user_info():
     """Display user information and logout button"""
@@ -155,13 +175,25 @@ def display_user_info():
         with st.sidebar:
             col1, col2 = st.columns([1, 3])
             
-            # Display profile picture
-            if 'picture' in user:
+            # Display profile picture (skip if running locally without auth)
+            if 'picture' in user and user['picture']:
                 col1.image(user['picture'], width=50)
+            elif AUTH_ENABLED:
+                # Show placeholder when auth is enabled but no picture
+                col1.write("👤")
+            else:
+                # Show local user icon when auth is disabled
+                col1.write("🏠")
             
             # Display name and email
             col2.write(f"**{user.get('name', 'User')}**")
-            col2.write(f"{user.get('email', '')}")
+            if AUTH_ENABLED:
+                col2.write(f"{user.get('email', '')}")
+            else:
+                col2.write("Local Development")
             
-            # Logout button - using the new logout_user function
-            st.button("Logout", on_click=logout_user)
+            # Only show logout button when auth is enabled
+            if AUTH_ENABLED:
+                st.button("Logout", on_click=logout_user)
+            else:
+                st.caption("Auth disabled - running locally")

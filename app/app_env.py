@@ -73,6 +73,7 @@ class AppSettings(BaseSettings):
     GCS_BUCKET_NAME: Optional[str] = Field(default=None, description="The Google Cloud Storage bucket name.")
 
     # Google OAuth (from auth.py, ensuring they are loaded from env)
+    ENABLE_AUTH: Optional[bool] = Field(default=False, description="Enable Google OAuth authentication.")
     GOOGLE_CLIENT_ID: Optional[str] = Field(default=None, description="Your Google OAuth Client ID.")
     GOOGLE_CLIENT_SECRET: Optional[SecretStr] = Field(default=None, description="Your Google OAuth Client Secret.")
     REDIRECT_URI: Optional[HttpUrl] = Field(default=None, description="The Google OAuth Redirect URI configured in your Google Cloud Console.")

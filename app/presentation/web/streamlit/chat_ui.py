@@ -37,8 +37,8 @@ def render_chat_ui():
     
     if 'expander_open' not in st.session_state:
         st.session_state.expander_open = True
-    
-    # Authentication check
+
+    # Authentication check (will pass through if AUTH_ENABLED is False)
     if not authenticate():
         # If not authenticated, authenticate function will display login page
         return
