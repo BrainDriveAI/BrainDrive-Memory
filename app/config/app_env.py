@@ -1,7 +1,6 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field, HttpUrl, SecretStr, ValidationError
 from typing import Optional
-import sys
 import logging
 
 logger = logging.getLogger(__name__)
@@ -108,11 +107,5 @@ except ValidationError as e:
                          "\nPlease check the logs and your .env file or environment settings."
     logger.error(full_error_message)
 
-    # Exit the application with an error code
-    # sys.exit(
-    #     "Configuration Error: Invalid or missing environment variables. Please check the logs and your .env file or environment settings.")
     # Re-raise a custom error
     raise CriticalConfigError(full_error_message) from e
-
-# To access: from app.app_env import app_env
-# e.g., app_env.OPENAI_API_KEY.get_secret_value()
