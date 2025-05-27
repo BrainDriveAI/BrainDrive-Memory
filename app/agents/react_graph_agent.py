@@ -3,7 +3,7 @@ from langchain.schema import SystemMessage
 
 from app.app_env import app_env
 from app.adapters.llm_adapter import search_llm_provider
-from app.agent_prompts.custom_prompt import system_prompt
+from app.agent_prompts.default_prompt import system_prompt
 from app.utils.get_current_date import get_current_datetime_cranford
 
 from app.tools.search.search_tool import search_for_memories
