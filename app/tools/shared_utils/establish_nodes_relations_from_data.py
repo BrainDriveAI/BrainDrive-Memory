@@ -1,4 +1,4 @@
-from app.adapters.llm_adapter import llm_provider
+from app.adapters.llm_adapter import search_llm_provider
 from app.logger import app_logger as logger
 from pydantic import BaseModel, Field
 from typing import List
@@ -40,7 +40,7 @@ def establish_nodes_relations_from_data(data, user_id, entity_type_map):
         ]
     )
 
-    structured_llm = llm_provider.with_structured_output(EstablishRelations)
+    structured_llm = search_llm_provider.with_structured_output(EstablishRelations)
     few_shot_structured_llm = prompt | structured_llm
     extracted_entities_response = few_shot_structured_llm.invoke({"entries_list": list(entity_type_map.keys()), "data": data})
 

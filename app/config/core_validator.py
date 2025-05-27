@@ -9,20 +9,64 @@ def validate_core_configuration() -> List[Dict[str, str]]:
     """
     issues: List[Dict[str, str]] = []
 
+    # LLM provider-specific checks
     # At least one LLM provider must be configured
-    providers = [
-        name for name, api in [
-            ("OpenAI", app_env.OPENAI_API_KEY),
-            ("Groq", app_env.GROQ_API_KEY),
-            ("OpenRouter", app_env.OPENROUTER_API_KEY),
-            ("TogetherAI", app_env.TOGETHER_AI_API_KEY)
-        ] if api is not None
-    ]
-    if not providers:
+    provider = app_env.LLM_PROVIDER
+    if provider == 'openai':
+        if not app_env.OPENAI_API_KEY:
+            issues.append({
+                'message': "OpenAI provider selected but OPENAI_API_KEY is missing.",
+                'details': "Set OPENAI_API_KEY in your .env.",
+                'fix': "Add OPENAI_API_KEY to .env file."
+            })
+    elif provider == 'ollama':
+        if not app_env.OLLAMA_LLM_MODEL:
+            issues.append({
+                'message': "Ollama provider selected but OLLAMA_LLM_MODEL is missing.",
+                'details': "Set OLLAMA_LLM_MODEL in your .env.",
+                'fix': "Add OLLAMA_LLM_MODEL to .env file."
+            })
+    elif provider == 'togetherai':
+        missing = []
+        if not app_env.TOGETHERAI_API_KEY:
+            missing.append('TOGETHERAI_API_KEY')
+        if not app_env.TOGETHERAI_LLM_MODEL:
+            missing.append('TOGETHERAI_LLM_MODEL')
+        if missing:
+            issues.append({
+                'message': f"TogetherAI provider selected but missing: {', '.join(missing)}.",
+                'details': f"Missing: {', '.join(missing)}.",
+                'fix': "Add the missing TogetherAI vars to your .env."
+            })
+    elif provider == 'openrouter':
+        missing = []
+        if not app_env.OPENROUTER_API_KEY:
+            missing.append('OPENROUTER_API_KEY')
+        if not app_env.OPENROUTER_LLM_MODEL:
+            missing.append('OPENROUTER_LLM_MODEL')
+        if missing:
+            issues.append({
+                'message': f"OpenRouter provider selected but missing: {', '.join(missing)}.",
+                'details': f"Missing: {', '.join(missing)}.",
+                'fix': "Add the missing OpenRouter vars to your .env."
+            })
+    elif provider == 'groq':
+        missing = []
+        if not app_env.GROQ_API_KEY:
+            missing.append('GROQ_API_KEY')
+        if not app_env.GROQ_LLM_MODEL:
+            missing.append('GROQ_LLM_MODEL')
+        if missing:
+            issues.append({
+                'message': f"Groq provider selected but missing: {', '.join(missing)}.",
+                'details': f"Missing: {', '.join(missing)}.",
+                'fix': "Add the missing Groq vars to your .env."
+            })
+    else:
         issues.append({
-            "message": "No LLM provider configured.",
-            "details": "Set at least one of OPENAI_API_KEY, GROQ_API_KEY, OPENROUTER_API_KEY, or TOGETHER_AI_API_KEY.",
-            "fix": "Add the missing API key(s) to your .env file."
+            'message': f"Unknown LLM provider '{provider}'.",
+            'details': "Valid options are: openai, ollama, togetherai, openrouter, groq.",
+            'fix': "Set LLM_PROVIDER to a supported provider."
         })
 
     # Neo4j must be configured for memory features

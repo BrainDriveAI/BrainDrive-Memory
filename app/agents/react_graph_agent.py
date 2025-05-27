@@ -28,7 +28,7 @@ agent_system_prompt = f"""
     ---
     Current date and time: {get_current_datetime_cranford()}
     ---
-    Refer to the user as:  {app_env.APP_USERNAME.capitalize()}
+    Refer to the user as: {app_env.APP_USERNAME.capitalize()}
 """
 
 graph = create_react_agent(search_llm_provider, tools=tools, state_modifier=SystemMessage(content=agent_system_prompt))

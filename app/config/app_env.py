@@ -34,6 +34,12 @@ class AppSettings(BaseSettings):
     ENABLE_AUTH: Optional[bool] = Field(default=False, description="Enable Google OAuth authentication.")
     ENABLE_FILE_UPLOAD: Optional[bool] = Field(default=False, description="Enable PDF file upload and processing functionality.")
 
+    # -- LLM provider selection --
+    LLM_PROVIDER: Literal['openai', 'pinecone', 'ollama', 'togetherai', 'openrouter', 'groq'] = Field(
+        default='openai',
+        description="Which LLM provider to use: openai, ollama, togetherai, openrouter, or groq."
+    )
+
     # -- Embedding provider selection --
     EMBEDDING_PROVIDER: Literal['openai', 'pinecone', 'ollama'] = Field(
         default='pinecone',
@@ -50,8 +56,9 @@ class AppSettings(BaseSettings):
     GROQ_LLM_MODEL: Optional[str] = Field(default="llama3-70b-8192", description="The Groq LLM model to be used.")
 
     # Ollama
-    OLLAMA_EMBEDDING_MODEL: Optional[str] = Field(default="mxbai-embed-large", description="The Ollama embedding model to be used.")
     OLLAMA_BASE_URL: Optional[HttpUrl] = Field(default=None, description="Ollama base URL if self-hosted and not using the default.")
+    OLLAMA_LLM_MODEL: Optional[str] = Field(default=None, description="Ollama LLM model.")
+    OLLAMA_EMBEDDING_MODEL: Optional[str] = Field(default="mxbai-embed-large", description="The Ollama embedding model to be used.")
 
     # Pinecone
     PINECONE_API_KEY: Optional[SecretStr] = Field(default=None, description="Your Pinecone API Key.")
