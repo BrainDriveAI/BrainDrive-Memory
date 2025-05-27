@@ -3,6 +3,8 @@
 .idea/
 __pycache__/
 
+venv/
+
 docker-compose.yml
 Dockerfile.dev
 

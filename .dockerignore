@@ -1,6 +1,7 @@
 __pycache__/
 *.pyc
 .git
+venv/
 tests/
 .langgraph_api/
 environment.yml
