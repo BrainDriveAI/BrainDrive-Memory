@@ -46,6 +46,12 @@ class AppSettings(BaseSettings):
         description="Which embedding provider to use: openai, pinecone, or ollama."
     )
 
+    # Agent Mode Selection
+    AGENT_MODE: Literal['memory', 'interviewer'] = Field(
+        default='memory',
+        description="Which agent mode to use: 'memory' for the main Memory Agent, 'interviewer' for the onboarding Interviewer Agent."
+    )
+
     # OpenAI
     OPENAI_API_KEY: Optional[SecretStr] = Field(..., description="Your OpenAI API Key.")
     OPENAI_LLM_MODEL: Optional[str] = Field(default="gpt-4.1", description="The OpenAI LLM model to be used.")
@@ -102,6 +108,16 @@ class AppSettings(BaseSettings):
     VERTEX_AI_LOCATION_ID: Optional[str] = Field(default=None, description="The Google Cloud location (region) for Vertex AI resources (e.g., 'us').")
     VERTEX_AI_SEARCH_ENGINE_ID: Optional[str] = Field(default=None, description="The ID of your Vertex AI Search engine.")
     VERTEX_AI_DATASTORE_ID: Optional[str] = Field(default=None, description="The ID of your Vertex AI Search datastore.")
+
+    @property
+    def is_interviewer_mode(self) -> bool:
+        """Check if the agent is in interviewer mode."""
+        return self.AGENT_MODE == 'interviewer'
+    
+    @property
+    def is_memory_mode(self) -> bool:
+        """Check if the agent is in memory mode.""" 
+        return self.AGENT_MODE == 'memory'
 
 
 # Instantiate settings. This will load, validate, and expose the settings.

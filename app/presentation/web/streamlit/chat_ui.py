@@ -35,8 +35,7 @@ def render_chat_ui():
                 st.write("**How to fix:**", issue["fix"])
         st.stop()
 
-    # Configure page layout
-    st.set_page_config(page_title="BrainDrive Memory AI Agent", layout="wide")
+    configure_page_header()
 
     # Hides "Deploy" button
     hide_deploy_button()
@@ -59,10 +58,6 @@ def render_chat_ui():
     # Display user information if authenticated
     display_user_info()
     
-    # Chat UI header
-    st.title("Chat with Your Memory AI Agent")
-    st.markdown("#### Your assistant for personalized, meaningful conversations.")
-    
     # File uploader for PDF ingestion
     handle_file_upload()
     
@@ -71,6 +66,21 @@ def render_chat_ui():
     
     # Process user input
     process_user_input()
+
+
+def configure_page_header():
+    if app_env.is_interviewer_mode:
+        # Configure page layout
+        st.set_page_config(page_title="BrainDrive Interviewer AI Agent", layout="wide")
+        # Chat UI header
+        st.title("Welcome to BrainDrive! I'm your Onboarding Interviewer Agent.")
+        st.markdown("#### Let's get to know you so your AI assistant can be personalized from day one.")
+    else:
+        # Configure page layout
+        st.set_page_config(page_title="BrainDrive Memory AI Agent", layout="wide")
+        # Chat UI header
+        st.title("Chat with Your Memory AI Agent")
+        st.markdown(f"#### Hello {app_env.APP_USERNAME.capitalize()}! I'm your Digital Brain Agent, ready to assist you with personalized responses.")
 
 
 def hide_deploy_button():
