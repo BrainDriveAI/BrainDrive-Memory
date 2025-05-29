@@ -30,4 +30,4 @@ graph = create_react_agent(search_llm_provider, tools=tools, state_modifier=Syst
 def invoke_our_graph(st_messages, callables):
     if not isinstance(callables, list):
         raise TypeError("callables must be a list")
-    return graph.invoke({"messages": st_messages}, config={"callbacks": callables})
+    return graph.invoke({"messages": st_messages}, config={"callbacks": callables, "recursion_limit": 10})
