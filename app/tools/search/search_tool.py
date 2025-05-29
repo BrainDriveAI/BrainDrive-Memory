@@ -2,6 +2,7 @@ import json
 import time
 import concurrent.futures
 from app.tools.shared_utils.search_graph_db import search_graph_db_by_query
+from app.tools.shared_utils.rerank_graph_results import rerank_graph_results
 from app.config.app_env import app_env
 from typing import Optional, Type
 from langchain_core.tools import tool
@@ -35,7 +36,7 @@ def search(query: str, user_id: str, limit: int = 100) -> str:
         try:
             vector_store_service = get_vector_store_instance()
             vector_start_time = time.time()
-            results = vector_store_service.hybrid_search(query, {"user_id": app_env.APP_USERNAME})
+            results = vector_store_service.hybrid_search(query, {"user_id": user_id})
             vector_time = time.time() - vector_start_time
             print(f"Vector search completed in {vector_time:.3f}s")
             return results
@@ -84,6 +85,9 @@ def search(query: str, user_id: str, limit: int = 100) -> str:
                     "source_id": item["source_id"],
                     "relation_id": item["relation_id"],
                     "destination_id": item["destination_id"],
+                    "created_at": item["created_at"],
+                    "updated_at": item["updated_at"],
+                    "similarity": item["similarity"]
                 })
             process_time = time.time() - process_start
             
@@ -117,9 +121,14 @@ def search(query: str, user_id: str, limit: int = 100) -> str:
     
     # Format the results
     format_start = time.time()
+    # NEW: immediately post-process the graph hits
+    keyword_search_results = rerank_graph_results(search_results, query)
+    
     combined_search_results = json.dumps(search_results) if len(search_results) else ""
     
     final_output = (
+        f"**Keyword search:** [{keyword_search_results}]\n"
+        f"___\n"
         f"**Knowledge graph data:** [{combined_search_results}]\n"
         f"___\n"
         f"**Vector store data:** [{vector_search_results}]\n"
@@ -138,7 +147,18 @@ def search(query: str, user_id: str, limit: int = 100) -> str:
 
 @tool
 def search_for_memories(query: str):
-    """Use the tool to search for memories and related graph data. Pass in detailed query to search for."""
+    """
+    Use the tool to search for memories and related graph data.
+    The `query` **must** be a concise “Subject + Verb” phrase describing exactly  
+    what you want to look up.  e.g.:
+
+      • “David lives in”  
+      • “David works at”  
+      • “David grew up in”  
+      • “David is also known as”
+
+    Avoid noun‐phrases like “David’s location” or “my nickname.”  
+    """
     print(f"Invoking: `search_for_memories` with `{{'query': '{query}'}}`")
     print(f"input data: {query}")
     return search(query, app_env.APP_USERNAME)
