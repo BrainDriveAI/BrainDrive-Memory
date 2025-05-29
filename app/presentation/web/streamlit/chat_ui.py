@@ -1,27 +1,27 @@
 """
-Memory AI Agent - Streamlit Chat Application
-A Streamlit-based chat interface for interacting with an AI agent with memory capabilities.
+Memory AI Agent - Refactored Streamlit Chat Application (Clean Architecture)
+A Streamlit-based chat interface following Clean Architecture principles.
 """
-
 import os
 from dotenv import load_dotenv
 import streamlit as st
 from langchain_core.messages import AIMessage, HumanMessage
+
 from app.services.document_processing_service import parseAndIngestPDFs
 from app.config.app_env import app_env
-from app.services.auth_service import authenticate, display_user_info
 from app.agents.react_graph_agent import invoke_our_graph
 from app.presentation.web.streamlit.streamlit_langraph_callback import get_streamlit_cb
 from app.config.validator import validate_configuration, ConfigError
 
+from app.infrastructure.di.container import container
+
 # Load environment variables
 load_dotenv()
-
 
 def render_chat_ui():
     """
     Render the main chat UI interface with file upload capabilities.
-    Handles authentication and manages the chat session.
+    Handles authentication and manages the chat session using Clean Architecture.
     """
     # Attempt full validation
     try:
@@ -35,28 +35,25 @@ def render_chat_ui():
                 st.write("**How to fix:**", issue["fix"])
         st.stop()
 
-    configure_page_header()
+    # Configure page layout
+    st.set_page_config(page_title="BrainDrive Memory AI Agent", layout="wide")
 
     # Hides "Deploy" button
     hide_deploy_button()
     
     # Initialize session state variables
-    if 'is_processing_pdf' not in st.session_state:
-        st.session_state.is_processing_pdf = False
+    initialize_session_state()
     
-    if 'messages' not in st.session_state:
-        st.session_state.messages = [AIMessage(content="How can I help you?")]
-    
-    if 'expander_open' not in st.session_state:
-        st.session_state.expander_open = True
-
-    # Authentication check (will pass through if AUTH_ENABLED is False)
-    if not authenticate():
-        # If not authenticated, authenticate function will display login page
+    # Authentication using Clean Architecture
+    if not handle_authentication():
+        # If not authenticated, authentication flow will display login page
         return
     
-    # Display user information if authenticated
+    # Display user information
     display_user_info()
+
+    # Chat UI header
+    display_page_header()
     
     # File uploader for PDF ingestion
     handle_file_upload()
@@ -67,32 +64,22 @@ def render_chat_ui():
     # Process user input
     process_user_input()
 
-
-def configure_page_header():
+def display_page_header():
+    """Configure page header based on app mode"""
     if app_env.is_interviewer_mode:
-        # Configure page layout
-        st.set_page_config(page_title="BrainDrive Interviewer AI Agent", layout="wide")
-        # Chat UI header
         st.title("Welcome to BrainDrive! I'm your Onboarding Interviewer Agent.")
         st.markdown("#### Let's get to know you so your AI assistant can be personalized from day one.")
     else:
-        # Configure page layout
-        st.set_page_config(page_title="BrainDrive Memory AI Agent", layout="wide")
-        # Chat UI header
         st.title("Chat with Your Memory AI Agent")
         st.markdown(f"#### Hello {app_env.APP_USERNAME.capitalize()}! I'm your Digital Brain Agent, ready to assist you with personalized responses.")
 
-
 def hide_deploy_button():
     """Hide the Streamlit deploy button."""
-    # Hide the "Deploy" button
     hide_deploy_button_style = """
         <style>
-            /* Hide the "Deploy" button */
             .stAppDeployButton {
                 display: none !important;
             }
-            /* Optional: If you want to remove the entire header menu */
             #MainMenu {
                 visibility: hidden;
             }
@@ -103,6 +90,43 @@ def hide_deploy_button():
     """
     st.markdown(hide_deploy_button_style, unsafe_allow_html=True)
 
+def initialize_session_state():
+    """Initialize session state variables"""
+    if 'is_processing_pdf' not in st.session_state:
+        st.session_state.is_processing_pdf = False
+    
+    if 'messages' not in st.session_state:
+        st.session_state.messages = [AIMessage(content="How can I help you?")]
+    
+    if 'expander_open' not in st.session_state:
+        st.session_state.expander_open = True
+
+def handle_authentication() -> bool:
+    """
+    Handle authentication using Clean Architecture
+    Returns True if authenticated, False otherwise
+    """
+    # Get authentication use case
+    authenticate_use_case = container.get_authenticate_user_use_case()
+    
+    # Execute authentication
+    return authenticate_use_case.execute()
+
+def display_user_info():
+    """Display user information using Clean Architecture"""
+    # Get user info use case
+    user_info_use_case = container.get_user_info_use_case()
+    logout_use_case = container.get_logout_user_use_case()
+    
+    # Get current user
+    user = user_info_use_case.execute()
+    
+    if user:
+        # Display user info with logout callback
+        container.user_display.display_user_info(
+            user=user,
+            on_logout_callback=logout_use_case.execute
+        )
 
 def handle_file_upload():
     """Handle PDF file uploads and processing with proper validation."""
@@ -172,7 +196,7 @@ def handle_file_upload():
     with st.sidebar:
         st.markdown("### ⚙️ File Upload Config")
         st.success("✅ All services configured")
-
+    
     # All validations passed - show the file uploader
     uploaded_file = st.file_uploader(
         "📄 Upload a PDF file", 
@@ -183,117 +207,130 @@ def handle_file_upload():
     )
     
     if uploaded_file is not None:
-        # Prevent multiple simultaneous uploads
-        if st.session_state.is_processing_pdf:
-            st.warning("⏳ Please wait for the current file to finish processing...")
-            return
+        handle_file_processing(uploaded_file)
+
+def handle_file_processing(uploaded_file):
+    """Handle the actual file processing logic"""
+    # Prevent multiple simultaneous uploads
+    if st.session_state.is_processing_pdf:
+        st.warning("⏳ Please wait for the current file to finish processing...")
+        return
+        
+    st.session_state.is_processing_pdf = True
+    
+    # Display file information
+    file_size_mb = len(uploaded_file.getbuffer()) / (1024 * 1024)
+    st.info(f"📄 **File:** {uploaded_file.name} ({file_size_mb:.1f} MB)")
+    
+    # Create temporary directory for file processing
+    temp_dir = "../../../temp"
+    os.makedirs(temp_dir, exist_ok=True)
+    temp_file_path = os.path.join(temp_dir, uploaded_file.name)
+    
+    # Processing status with progress
+    processing_container = st.container()
+    
+    with processing_container:
+        progress_bar = st.progress(0)
+        status_text = st.empty()
+        
+        try:
+            # Step 1: Save file
+            status_text.info("💾 Saving uploaded file...")
+            progress_bar.progress(20)
             
-        st.session_state.is_processing_pdf = True
-        
-        # Display file information
-        file_size_mb = len(uploaded_file.getbuffer()) / (1024 * 1024)
-        st.info(f"📄 **File:** {uploaded_file.name} ({file_size_mb:.1f} MB)")
-        
-        # Create temporary directory for file processing
-        temp_dir = "../../../temp"
-        os.makedirs(temp_dir, exist_ok=True)
-        temp_file_path = os.path.join(temp_dir, uploaded_file.name)
-        
-        # Processing status with progress
-        processing_container = st.container()
-        
-        with processing_container:
-            progress_bar = st.progress(0)
-            status_text = st.empty()
+            with open(temp_file_path, "wb") as file:
+                file.write(uploaded_file.getbuffer())
             
-            try:
-                # Step 1: Save file
-                status_text.info("💾 Saving uploaded file...")
-                progress_bar.progress(20)
-                
-                with open(temp_file_path, "wb") as file:
-                    file.write(uploaded_file.getbuffer())
-                
-                # Step 2: Upload to GCS
-                status_text.info("☁️ Uploading to Google Cloud Storage...")
-                progress_bar.progress(40)
-                
-                # Step 3: Process with LLM Sherpa and ingest to Neo4j
-                status_text.info("🔍 Processing PDF content and structure...")
-                progress_bar.progress(60)
-                
-                file_info = parseAndIngestPDFs(
-                    temp_file_path, 
-                    uploaded_file.name, 
-                    app_env.GCS_BUCKET_NAME
-                )
-                
-                # Step 4: Complete
-                progress_bar.progress(100)
-                status_text.empty()
-                progress_bar.empty()
-                
-                # Success message
-                st.success("🎉 **File processed successfully!**")
-                
-                # Display processing results
-                with st.expander("📊 **Processing Results**", expanded=True):
-                    if file_info:
-                        st.json(file_info)
-                    else:
-                        st.info("File processed and stored in the knowledge base. You can now ask questions about this document!")
-                
-                # Show next steps
-                st.info("💬 **Next Steps:** Use the chat below to ask questions about your uploaded document!")
-                
-            except Exception as error:
-                # Clear progress indicators
-                progress_bar.empty()
-                status_text.empty()
-                
-                # Show detailed error information
-                st.error("❌ **Error processing file:**")
-                
-                error_message = str(error)
-                if "LLM Sherpa" in error_message or "5010" in error_message:
-                    st.error("🔧 **LLM Sherpa API Error:** Please ensure the LLM Sherpa server is running")
-                    with st.expander("🆘 **Troubleshooting LLM Sherpa**"):
-                        st.markdown("""
-                        **Start LLM Sherpa server:**
-                        ```bash
-                        docker run -p 5010:5010 nlmatics/llmsherpa:latest
-                        ```
-                        
-                        **Or check if it's running:**
-                        ```bash
-                        curl http://localhost:5010/api/parseDocument
-                        ```
-                        """)
-                elif "GCS" in error_message or "Google Cloud" in error_message:
-                    st.error("☁️ **Google Cloud Storage Error:** Please check your GCS configuration and permissions")
-                elif "Neo4j" in error_message:
-                    st.error("🗄️ **Neo4j Database Error:** Please check your Neo4j connection and credentials")
+            # Step 2: Upload to GCS
+            status_text.info("☁️ Uploading to Google Cloud Storage...")
+            progress_bar.progress(40)
+            
+            # Step 3: Process with LLM Sherpa and ingest to Neo4j
+            status_text.info("🔍 Processing PDF content and structure...")
+            progress_bar.progress(60)
+            
+            file_info = parseAndIngestPDFs(
+                temp_file_path, 
+                uploaded_file.name, 
+                app_env.GCS_BUCKET_NAME
+            )
+            
+            # Step 4: Complete
+            progress_bar.progress(100)
+            status_text.empty()
+            progress_bar.empty()
+            
+            # Success message
+            st.success("🎉 **File processed successfully!**")
+            
+            # Display processing results
+            with st.expander("📊 **Processing Results**", expanded=True):
+                if file_info:
+                    st.json(file_info)
                 else:
-                    st.error(f"**Error details:** {error_message}")
-                
-                # Log the full error for debugging
-                import logging
-                logging.error(f"File processing error for {uploaded_file.name}: {error}", exc_info=True)
-                
-            finally:
-                # Clean up temporary file
-                if os.path.exists(temp_file_path):
-                    try:
-                        os.remove(temp_file_path)
-                    except Exception as cleanup_error:
-                        logging.warning(f"Failed to clean up temp file {temp_file_path}: {cleanup_error}")
-                
-                # Reset processing state
-                st.session_state.is_processing_pdf = False
-                
-                # Clear the uploaded file from session to allow re-upload
-                if 'uploaded_file' in st.session_state:
-                    del st.session_state.uploaded_file
+                    st.info("File processed and stored in the knowledge base. You can now ask questions about this document!")
+            
+            # Show next steps
+            st.info("💬 **Next Steps:** Use the chat below to ask questions about your uploaded document!")
+            
+        except Exception as error:
+            handle_file_processing_error(error, uploaded_file.name, progress_bar, status_text)
+            
+        finally:
+            # Clean up temporary file
+            cleanup_temp_file(temp_file_path)
+            
+            # Reset processing state
+            st.session_state.is_processing_pdf = False
+            
+            # Clear the uploaded file from session to allow re-upload
+            if 'uploaded_file' in st.session_state:
+                del st.session_state.uploaded_file
+
+def handle_file_processing_error(error, filename, progress_bar, status_text):
+    """Handle file processing errors"""
+    # Clear progress indicators
+    progress_bar.empty()
+    status_text.empty()
+    
+    # Show detailed error information
+    st.error("❌ **Error processing file:**")
+    
+    error_message = str(error)
+    if "LLM Sherpa" in error_message or "5010" in error_message:
+        st.error("🔧 **LLM Sherpa API Error:** Please ensure the LLM Sherpa server is running")
+        with st.expander("🆘 **Troubleshooting LLM Sherpa**"):
+            st.markdown("""
+            **Start LLM Sherpa server:**
+            ```bash
+            docker run -p 5010:5010 nlmatics/llmsherpa:latest
+            ```
+            
+            **Or check if it's running:**
+            ```bash
+            curl http://localhost:5010/api/parseDocument
+            ```
+            """)
+    elif "GCS" in error_message or "Google Cloud" in error_message:
+        st.error("☁️ **Google Cloud Storage Error:** Please check your GCS configuration and permissions")
+    elif "Neo4j" in error_message:
+        st.error("🗄️ **Neo4j Database Error:** Please check your Neo4j connection and credentials")
+    else:
+        st.error(f"**Error details:** {error_message}")
+    
+    # Log the full error for debugging
+    import logging
+    logging.error(f"File processing error for {filename}: {error}", exc_info=True)
+
+def cleanup_temp_file(temp_file_path):
+    """Clean up temporary file"""
+    if os.path.exists(temp_file_path):
+        try:
+            os.remove(temp_file_path)
+        except Exception as cleanup_error:
+            import logging
+            logging.warning(f"Failed to clean up temp file {temp_file_path}: {cleanup_error}")
 
 def display_chat_messages():
     """Display all messages in the chat history."""
@@ -302,7 +339,6 @@ def display_chat_messages():
             st.chat_message("assistant").write(message.content)
         elif isinstance(message, HumanMessage):
             st.chat_message("user").write(message.content)
-
 
 def process_user_input():
     """Process user input and generate AI response."""
