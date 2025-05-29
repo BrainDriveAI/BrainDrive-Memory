@@ -14,6 +14,9 @@ RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt 
 # Now copy the rest of the application files
 COPY . /app
 
+# Pre-download the NLTK punkt_tab tokenizer
+RUN python -m nltk.downloader punkt_tab
+
 # Expose Streamlit's default port
 EXPOSE 8501
 
