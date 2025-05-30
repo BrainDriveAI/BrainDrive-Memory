@@ -1,16 +1,15 @@
-from typing import List, Annotated
+from typing import List
 from pydantic import BaseModel, Field
-from langchain_groq import ChatGroq
-from langchain_core.messages import SystemMessage, HumanMessage, AIMessage, AnyMessage
+from langchain_core.messages import SystemMessage, HumanMessage
 from app.config.app_env import app_env
-
+from app.adapters.llm_adapter import search_llm_provider
 
 class SearchQueries(BaseModel):
     queries: List[str] = Field(
         ...,  # make this required
-        min_items=4,
+        min_items=3,
         max_items=6,
-        description="A list of 4-6 strategically crafted search queries to comprehensively retrieve relevant user memories."
+        description="A list of 3-6 strategically crafted search queries to comprehensively retrieve relevant user memories."
     )
 
 
@@ -32,18 +31,13 @@ def analyze_and_generate_queries(user_input: str, chat_history: str):
     username = app_env.APP_USERNAME.capitalize()
     
     # Create model instance
-    model = ChatGroq(
-        model=app_env.GROQ_LLM_MODEL,
-        temperature=0,
-        api_key=app_env.GROQ_API_KEY.get_secret_value()
-    )
-    structured_model = model.with_structured_output(SearchQueries)
+    structured_model = search_llm_provider.with_structured_output(SearchQueries)
     
     # Enhanced system prompt with sophisticated categorization logic
     system_prompt = f"""You are an expert query strategist for a personal memory AI system. Your job is to analyze user input and generate strategic search queries to retrieve comprehensive, relevant personal information.
 
     **CORE REQUIREMENTS:**
-    - Generate EXACTLY 4-6 queries (no more, no less)
+    - Generate EXACTLY 3-6 queries (no more, no less)
     - Each query must be semantically distinct and serve a different search purpose
     - Use natural, complete phrases that would actually exist in personal memories
     - Prioritize quality over quantity - each query should have high retrieval potential
