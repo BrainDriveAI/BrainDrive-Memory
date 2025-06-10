@@ -35,9 +35,9 @@ class AppSettings(BaseSettings):
     ENABLE_FILE_UPLOAD: Optional[bool] = Field(default=False, description="Enable PDF file upload and processing functionality.")
 
     # -- LLM provider selection --
-    LLM_PROVIDER: Literal['openai', 'pinecone', 'ollama', 'togetherai', 'openrouter', 'groq'] = Field(
+    LLM_PROVIDER: Literal['openai', 'pinecone', 'ollama', 'togetherai', 'openrouter', 'groq', 'cloud_run_gemma'] = Field(
         default='openai',
-        description="Which LLM provider to use: openai, ollama, togetherai, openrouter, or groq."
+        description="Which LLM provider to use: openai, ollama, togetherai, openrouter, groq or cloud_run_gemma."
     )
 
     # -- Embedding provider selection --
@@ -108,6 +108,12 @@ class AppSettings(BaseSettings):
     VERTEX_AI_LOCATION_ID: Optional[str] = Field(default=None, description="The Google Cloud location (region) for Vertex AI resources (e.g., 'us').")
     VERTEX_AI_SEARCH_ENGINE_ID: Optional[str] = Field(default=None, description="The ID of your Vertex AI Search engine.")
     VERTEX_AI_DATASTORE_ID: Optional[str] = Field(default=None, description="The ID of your Vertex AI Search datastore.")
+
+    # Gemma on Cloud Run
+    GEMMA_SERVICE_URL: Optional[HttpUrl] = Field(default=None, description="The URL of your Gemma service.")
+    GEMMA_API_KEY: Optional[SecretStr] = Field(default=None, description="Your Gemma API Key.")
+    GEMMA_SERVICE_ACCOUNT_PATH: Optional[str] = Field(default=None, description="Your service account JSON key path.")
+    GEMMA_LLM_MODEL: Optional[str] = Field(default="gemma-3-27b-it", description="The Gemma LLM model to be used.")
 
     @property
     def is_interviewer_mode(self) -> bool:
