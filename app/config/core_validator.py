@@ -62,6 +62,13 @@ def validate_core_configuration() -> List[Dict[str, str]]:
                 'details': f"Missing: {', '.join(missing)}.",
                 'fix': "Add the missing Groq vars to your .env."
             })
+    elif provider == 'cloud_run_gemma':
+        if not app_env.GEMMA_SERVICE_URL or not app_env.GEMMA_API_KEY or not app_env.GEMMA_SERVICE_ACCOUNT_PATH:
+            issues.append({
+                'message': "Cloud Run Gemma provider selected but required configuration is missing.",
+                'details': "Set GEMMA_SERVICE_URL, GEMMA_API_KEY, and GEMMA_SERVICE_ACCOUNT_PATH in your .env.",
+                'fix': "Add GEMMA_SERVICE_URL, GEMMA_API_KEY, and GEMMA_SERVICE_ACCOUNT_PATH to .env file."
+            })
     else:
         issues.append({
             'message': f"Unknown LLM provider '{provider}'.",
