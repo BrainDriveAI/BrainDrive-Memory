@@ -52,6 +52,9 @@ def render_chat_ui():
     # Display user information
     display_user_info()
 
+    # Display LLM health status in sidebar
+    display_llm_health_status()
+
     # Chat UI header
     display_page_header()
     
@@ -64,6 +67,7 @@ def render_chat_ui():
     # Process user input
     process_user_input()
 
+
 def display_page_header():
     """Configure page header based on app mode"""
     if app_env.is_interviewer_mode:
@@ -72,6 +76,7 @@ def display_page_header():
     else:
         st.title("Chat with Your Memory AI Agent")
         st.markdown(f"#### Hello {app_env.APP_USERNAME.capitalize()}! I'm your Digital Brain Agent, ready to assist you with personalized responses.")
+
 
 def hide_deploy_button():
     """Hide the Streamlit deploy button."""
@@ -90,6 +95,27 @@ def hide_deploy_button():
     """
     st.markdown(hide_deploy_button_style, unsafe_allow_html=True)
 
+
+def display_llm_health_status():
+    """
+    Display LLM connectivity status in the sidebar.
+    Uses Clean Architecture with dependency injection.
+    """
+    # Get health display component from container
+    health_display = container.get_llm_health_display()
+    
+    # Display in sidebar
+    with st.sidebar:
+        # Add some spacing from other sidebar content
+        st.markdown("---")
+        
+        # Display the health status
+        health_display.display_health_status()
+        
+        # Add some spacing after
+        st.markdown("---")
+
+
 def initialize_session_state():
     """Initialize session state variables"""
     if 'is_processing_pdf' not in st.session_state:
@@ -101,6 +127,7 @@ def initialize_session_state():
     if 'expander_open' not in st.session_state:
         st.session_state.expander_open = True
 
+
 def handle_authentication() -> bool:
     """
     Handle authentication using Clean Architecture
@@ -111,6 +138,7 @@ def handle_authentication() -> bool:
     
     # Execute authentication
     return authenticate_use_case.execute()
+
 
 def display_user_info():
     """Display user information using Clean Architecture"""
@@ -127,6 +155,7 @@ def display_user_info():
             user=user,
             on_logout_callback=logout_use_case.execute
         )
+
 
 def handle_file_upload():
     """Handle PDF file uploads and processing with proper validation."""
@@ -209,6 +238,7 @@ def handle_file_upload():
     if uploaded_file is not None:
         handle_file_processing(uploaded_file)
 
+
 def handle_file_processing(uploaded_file):
     """Handle the actual file processing logic"""
     # Prevent multiple simultaneous uploads
@@ -288,6 +318,7 @@ def handle_file_processing(uploaded_file):
             if 'uploaded_file' in st.session_state:
                 del st.session_state.uploaded_file
 
+
 def handle_file_processing_error(error, filename, progress_bar, status_text):
     """Handle file processing errors"""
     # Clear progress indicators
@@ -323,6 +354,7 @@ def handle_file_processing_error(error, filename, progress_bar, status_text):
     import logging
     logging.error(f"File processing error for {filename}: {error}", exc_info=True)
 
+
 def cleanup_temp_file(temp_file_path):
     """Clean up temporary file"""
     if os.path.exists(temp_file_path):
@@ -332,6 +364,7 @@ def cleanup_temp_file(temp_file_path):
             import logging
             logging.warning(f"Failed to clean up temp file {temp_file_path}: {cleanup_error}")
 
+
 def display_chat_messages():
     """Display all messages in the chat history."""
     for message in st.session_state.messages:
@@ -339,6 +372,7 @@ def display_chat_messages():
             st.chat_message("assistant").write(message.content)
         elif isinstance(message, HumanMessage):
             st.chat_message("user").write(message.content)
+
 
 def process_user_input():
     """Process user input and generate AI response."""
