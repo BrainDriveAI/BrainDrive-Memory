@@ -1,10 +1,11 @@
 from typing import Optional, Dict, Any, List
 import logging
+import threading
 
 from app.interfaces.graph_db_interface import GraphDBInterface
 from app.interfaces.vector_store_interface import VectorStoreInterface
 from app.interfaces.vertex_ai_search_interface import VertexAISearchInterface
-from app.adapters.graph_db_adapter import Neo4jAdapter
+from app.adapters.graph_db_thread_safe_adapter import Neo4jAdapter, Neo4jAdapterMonitor
 from app.adapters.vector_store_adapter import SupabaseVectorStoreAdapter
 from app.adapters.vertex_ai_search_adapter import VertexAISearchAdapter
 from app.settings import GRAPH_DB_PROVIDER, VECTOR_STORE_PROVIDER
@@ -69,26 +70,81 @@ _vector_store_instance: Optional[VectorStoreInterface] = None
 _vertex_ai_search_instance: Optional[VertexAISearchInterface] = None
 
 
+# def get_graph_db_instance() -> GraphDBInterface:
+#     """
+#     Provides a singleton instance of the configured GraphDBInterface.
+#     Initializes the instance on first call based on settings.
+#     """
+#     global _graph_db_instance
+#     if _graph_db_instance is None:
+#         logger.info(f"Initializing GraphDB instance with provider: {GRAPH_DB_PROVIDER}")
+#         if GRAPH_DB_PROVIDER == "neo4j":
+#             _graph_db_instance = Neo4jAdapter(
+#                 url=app_env.NEO4J_URL,
+#                 username=app_env.NEO4J_USER,
+#                 password=app_env.NEO4J_PWD.get_secret_value()
+#             )
+#         # Add other providers here with an elif block
+#         # elif GRAPH_DB_PROVIDER == "another_graph_provider":
+#         #     _graph_db_instance = AnotherGraphAdapter(...)
+#         else:  # "none" or unrecognized
+#             _graph_db_instance = NullGraphDB()
+#     return _graph_db_instance
+# Thread lock for singleton initialization
+_graph_db_lock = threading.Lock()
+
 def get_graph_db_instance() -> GraphDBInterface:
     """
-    Provides a singleton instance of the configured GraphDBInterface.
+    Provides a thread-safe singleton instance of the configured GraphDBInterface.
     Initializes the instance on first call based on settings.
     """
     global _graph_db_instance
+    
     if _graph_db_instance is None:
-        logger.info(f"Initializing GraphDB instance with provider: {GRAPH_DB_PROVIDER}")
-        if GRAPH_DB_PROVIDER == "neo4j":
-            _graph_db_instance = Neo4jAdapter(
-                url=app_env.NEO4J_URL,
-                username=app_env.NEO4J_USER,
-                password=app_env.NEO4J_PWD.get_secret_value()
-            )
-        # Add other providers here with an elif block
-        # elif GRAPH_DB_PROVIDER == "another_graph_provider":
-        #     _graph_db_instance = AnotherGraphAdapter(...)
-        else:  # "none" or unrecognized
-            _graph_db_instance = NullGraphDB()
+        with _graph_db_lock:  # Double-checked locking pattern
+            if _graph_db_instance is None:
+                logger.info(f"Initializing thread-safe GraphDB instance with provider: {GRAPH_DB_PROVIDER}")
+                
+                if GRAPH_DB_PROVIDER == "neo4j":
+                    _graph_db_instance = Neo4jAdapter(
+                        url=app_env.NEO4J_URL,
+                        username=app_env.NEO4J_USER,
+                        password=app_env.NEO4J_PWD.get_secret_value()
+                    )
+                    
+                    # Optional: Test connection on initialization
+                    if Neo4jAdapterMonitor.test_connection(_graph_db_instance):
+                        logger.info("Neo4j connection test successful")
+                    else:
+                        logger.warning("Neo4j connection test failed - but continuing anyway")
+                        
+                # Add other providers here with an elif block
+                # elif GRAPH_DB_PROVIDER == "another_graph_provider":
+                #     _graph_db_instance = AnotherGraphAdapter(...)
+                else:  # "none" or unrecognized
+                    _graph_db_instance = NullGraphDB()
+    
     return _graph_db_instance
+
+# Optional: Add monitoring functions
+def monitor_graph_db_connections():
+    """
+    Debug function to monitor current graph DB connections.
+    Call this if you want to see connection status.
+    """
+    if graph_db_instance and isinstance(graph_db_instance, Neo4jAdapter):
+        Neo4jAdapterMonitor.log_connection_info(graph_db_instance)
+    else:
+        print("[Monitor] No Neo4jAdapter instance available")
+
+def cleanup_graph_db():
+    """
+    Clean up graph DB connections. Call this during application shutdown.
+    """
+    global graph_db_instance
+    if graph_db_instance and hasattr(graph_db_instance, 'close'):
+        graph_db_instance.close()
+        logger.info("Graph DB connections cleaned up")
 
 
 def get_vertex_ai_search_instance() -> VertexAISearchInterface:
