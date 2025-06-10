@@ -88,7 +88,7 @@ def search_graph_db(node_list, user_id, limit=10):
     """Search similar nodes among and their respective incoming and outgoing relations."""
     start_time = time.time()
     
-    threshold = 0.8
+    threshold = 0.9
     result_relations = []
     print(f"Node list: ${node_list}")
 
@@ -97,7 +97,7 @@ def search_graph_db(node_list, user_id, limit=10):
         "neighboursPerEmb": limit * 2,
         "limit": limit,
         "user_id": user_id,
-        "threshold": 0.8
+        "threshold": threshold
     }
     graph_db_service = get_graph_db_instance()
     result_relations = graph_db_service.query(batch_cypher_query, params=params)
@@ -111,12 +111,12 @@ def search_graph_db_by_query(query: str, user_id: str, limit=5):
     """Search similar nodes among and their respective incoming and outgoing relations."""
     start_time = time.time()
     
-    threshold = 0.7
+    threshold = 0.8
     result_relations = []
 
     params = {
         "n_embedding": embedder.embed_query(query),
-        "neighboursPerEmb": limit * 2,
+        "neighboursPerEmb": limit * 1,
         "limit": limit,
         "user_id": user_id,
         "threshold": threshold
