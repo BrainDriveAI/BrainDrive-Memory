@@ -9,6 +9,10 @@ from app.infrastructure.repositories.google_auth_repository import GoogleAuthRep
 from app.infrastructure.adapters.streamlit_session_repository import StreamlitSessionRepository
 from app.infrastructure.adapters.streamlit_ui_adapter import StreamlitUIAdapter
 from app.infrastructure.adapters.streamlit_user_display import StreamlitUserDisplay
+from app.services.llm_health_service import LLMHealthService
+from app.services.llm_factory_service import LLMFactoryService
+from app.use_cases.check_llm_health_use_case import CheckLLMHealthUseCase
+from app.presentation.web.streamlit.components.llm_health_display import LLMHealthDisplay
 
 class DIContainer:
     """Dependency Injection Container for Clean Architecture"""
@@ -19,6 +23,11 @@ class DIContainer:
         self._ui_adapter: Optional[StreamlitUIAdapter] = None
         self._auth_service: Optional[AuthDomainService] = None
         self._user_display: Optional[StreamlitUserDisplay] = None
+        # Health check services
+        self._llm_factory_service = None
+        self._llm_health_service = None
+        self._check_llm_health_use_case = None
+        self._llm_health_display = None
     
     @property
     def auth_repository(self) -> GoogleAuthRepository:
@@ -89,6 +98,40 @@ class DIContainer:
     def get_check_authentication_use_case(self) -> CheckAuthenticationUseCase:
         """Get Check Authentication Use Case"""
         return CheckAuthenticationUseCase(auth_service=self.auth_service)
+    
+    # LLM Factory Service
+    def get_llm_factory_service(self) -> LLMFactoryService:
+        """Get or create LLM factory service"""
+        if self._llm_factory_service is None:
+            self._llm_factory_service = LLMFactoryService()
+        return self._llm_factory_service
+    
+    # LLM Health Service
+    def get_llm_health_service(self) -> LLMHealthService:
+        """Get or create LLM health service"""
+        if self._llm_health_service is None:
+            self._llm_health_service = LLMHealthService()
+            # Inject dependencies
+            self._llm_health_service.set_llm_factory(self.get_llm_factory_service())
+        return self._llm_health_service
+    
+    # Check LLM Health Use Case
+    def get_check_llm_health_use_case(self) -> CheckLLMHealthUseCase:
+        """Get or create check LLM health use case"""
+        if self._check_llm_health_use_case is None:
+            self._check_llm_health_use_case = CheckLLMHealthUseCase(
+                health_service=self.get_llm_health_service()
+            )
+        return self._check_llm_health_use_case
+    
+    # LLM Health Display Component
+    def get_llm_health_display(self) -> LLMHealthDisplay:
+        """Get or create LLM health display component"""
+        if self._llm_health_display is None:
+            self._llm_health_display = LLMHealthDisplay(
+                health_use_case=self.get_check_llm_health_use_case()
+            )
+        return self._llm_health_display
 
 # Global container instance
 container = DIContainer()
