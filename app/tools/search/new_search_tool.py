@@ -77,7 +77,7 @@ def search_for_memories(raw_query: str, state: Annotated[AgentState, InjectedSta
     
     # Create search tasks for each strategic query
     search_tasks = []
-    with concurrent.futures.ThreadPoolExecutor(max_workers=min(len(strategic_queries), 8)) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=min(len(strategic_queries), 5)) as executor:
         for i, query in enumerate(strategic_queries):
             print(f"  Query {i+1}: {query}")
             future = executor.submit(search_single_query, query, app_env.APP_USERNAME)
@@ -240,6 +240,8 @@ def synthesize_search_results(all_results: dict, original_query: str) -> str:
                             'content': query_results,
                             'source_query': query
                         })
+
+    print(f"Unique results: {unique_results}")
     
     # Deduplicate based on content similarity
     for result_type in unique_results.keys():
