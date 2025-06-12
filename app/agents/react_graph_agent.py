@@ -3,7 +3,7 @@ from langgraph.prebuilt import create_react_agent
 from app.adapters.llm_adapter import search_llm_provider
 from app.agent_prompts.system_prompt_manager import SystemPromptManager
 
-from app.tools.search.new_search_tool import search_for_memories
+from app.tools.search.search_tool import search_for_memories
 from app.tools.add.add_tool import add_graph_memory
 from app.tools.get_all.get_all_tool import get_all_items
 from app.tools.update.update_tool import update_graph_memory
