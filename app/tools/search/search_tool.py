@@ -15,13 +15,14 @@ from langchain.callbacks.manager import (
 from pydantic import BaseModel, Field
 from langchain.tools import BaseTool
 
+from app.tools.search.query_rewriter import analyze_and_generate_queries
 
-def search(query: str, user_id: str, limit: int = 100) -> str:
+def search(raw_query: str, user_id: str, limit: int = 100) -> str:
     """
     Search for memories and related graph data in parallel.
     
     Args:
-        query (str): Query to search for.
+        raw_query (str): Query to search for.
         user_id (str): Username to search for.
         limit (int): The maximum number of nodes and relationships to retrieve. Defaults to 100.
         
@@ -29,6 +30,11 @@ def search(query: str, user_id: str, limit: int = 100) -> str:
         str: A formatted string containing search results from different sources.
     """
     overall_start_time = time.time()
+    strategic_queries = analyze_and_generate_queries(raw_query)
+
+    # Option 1: Direct indexing
+    query = strategic_queries[0]
+
     print(f"Starting search for query: '{query}'")
     
     # Define the search functions to run in parallel
@@ -149,15 +155,8 @@ def search(query: str, user_id: str, limit: int = 100) -> str:
 def search_for_memories(query: str):
     """
     Use the tool to search for memories and related graph data.
-    The `query` **must** be a concise “Subject + Verb” phrase describing exactly  
-    what you want to look up.  e.g.:
-
-      • “David lives in”  
-      • “David works at”  
-      • “David grew up in”  
-      • “David is also known as”
-
-    Avoid noun‐phrases like “David’s location” or “my nickname.”  
+    Your task is to create the most effective query string for the given user question.
+    This query string will be used to search for relevant documents in an Graph DB and Vector index.
     """
     print(f"Invoking: `search_for_memories` with `{{'query': '{query}'}}`")
     print(f"input data: {query}")
