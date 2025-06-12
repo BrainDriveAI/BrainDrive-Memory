@@ -111,12 +111,12 @@ def search_graph_db_by_query(query: str, user_id: str, limit=5):
     """Search similar nodes among and their respective incoming and outgoing relations."""
     start_time = time.time()
     
-    threshold = 0.8
+    threshold = 0.7
     result_relations = []
 
     params = {
         "n_embedding": embedder.embed_query(query),
-        "neighboursPerEmb": limit * 1,
+        "neighboursPerEmb": limit * 2,
         "limit": limit,
         "user_id": user_id,
         "threshold": threshold

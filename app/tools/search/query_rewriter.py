@@ -8,7 +8,7 @@ from app.tools.search.query_rewriting_class import CompactSearchQueries
 
 def analyze_and_generate_queries(user_input: str):
     """
-    Analyzes user input and conversation history to generate strategic search queries
+    Analyzes user input and conversation history to generate strategic search query
     for comprehensive memory retrieval across all data sources.
     
     Uses LLM reasoning to understand user intent and create multiple query variations
@@ -18,7 +18,7 @@ def analyze_and_generate_queries(user_input: str):
         user_input (str): The user's raw question or request
         
     Returns:
-        List[str]: Strategically generated search queries ready for memory search
+        str: Strategically generated search query ready for memory search
     """
     try:
         print(f"Starting query generation for input: '{user_input}'")
@@ -32,15 +32,6 @@ def analyze_and_generate_queries(user_input: str):
 
         query_llm = get_llm()
         
-        # Check if search_llm_provider is available and has required method
-        if not hasattr(query_llm, 'with_structured_output'):
-            raise AttributeError("query_llm does not have 'with_structured_output' method")
-        
-        # Create model instance
-        print("Creating structured model instance...")
-        structured_model = query_llm.with_structured_output(CompactSearchQueries)
-        print("Structured model created successfully")
-        
         # Enhanced system prompt with sophisticated categorization logic
         
         # Prepare context message
@@ -49,26 +40,12 @@ def analyze_and_generate_queries(user_input: str):
         
         # Generate queries
         print("Invoking structured model...")
-        result = structured_model.invoke([
+        result = query_llm.invoke([
             SystemMessage(content=query_rewriting_system_prompt), HumanMessage(content=context_message)
         ])
         print("Model invocation successful")
         
-        # Validate result
-        if not hasattr(result, 'queries'):
-            raise AttributeError("Result does not have 'queries' attribute")
-            
-        if not isinstance(result.queries, list):
-            raise TypeError(f"Expected queries to be a list, got {type(result.queries)}")
-            
-        if len(result.queries) < 2 or len(result.queries) > 4:
-            raise ValueError(f"Expected 2-4 queries, got {len(result.queries)}")
-        
-        print(f"Generated {len(result.queries)} search queries for: '{user_input}'")
-        for i, query in enumerate(result.queries, 1):
-            print(f"  {i}. {query}")
-        
-        return result.queries
+        return result.content
         
     except AttributeError as e:
         print(f"AttributeError in analyze_and_generate_queries: {e}")

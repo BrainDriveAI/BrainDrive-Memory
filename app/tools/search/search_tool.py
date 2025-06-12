@@ -17,12 +17,12 @@ from langchain.tools import BaseTool
 
 from app.tools.search.query_rewriter import analyze_and_generate_queries
 
-def search(raw_query: str, user_id: str, limit: int = 100) -> str:
+def search(query: str, user_id: str, limit: int = 100) -> str:
     """
     Search for memories and related graph data in parallel.
     
     Args:
-        raw_query (str): Query to search for.
+        query (str): Query to search for.
         user_id (str): Username to search for.
         limit (int): The maximum number of nodes and relationships to retrieve. Defaults to 100.
         
@@ -30,10 +30,7 @@ def search(raw_query: str, user_id: str, limit: int = 100) -> str:
         str: A formatted string containing search results from different sources.
     """
     overall_start_time = time.time()
-    strategic_queries = analyze_and_generate_queries(raw_query)
-
-    # Option 1: Direct indexing
-    query = strategic_queries[0]
+    # query = analyze_and_generate_queries(raw_query)
 
     print(f"Starting search for query: '{query}'")
     
@@ -92,8 +89,7 @@ def search(raw_query: str, user_id: str, limit: int = 100) -> str:
                     "relation_id": item["relation_id"],
                     "destination_id": item["destination_id"],
                     "created_at": item["created_at"],
-                    "updated_at": item["updated_at"],
-                    "similarity": item["similarity"]
+                    "updated_at": item["updated_at"]
                 })
             process_time = time.time() - process_start
             
@@ -133,6 +129,8 @@ def search(raw_query: str, user_id: str, limit: int = 100) -> str:
     combined_search_results = json.dumps(search_results) if len(search_results) else ""
     
     final_output = (
+        f"User has asked: {query}\n"
+        f"Use the following context to answer the user's question. Do not respond with summary and relationship obeservatio. Answer question directly, with 1 - 2 sentences.\n\n"
         f"**Keyword search:** [{keyword_search_results}]\n"
         f"___\n"
         f"**Knowledge graph data:** [{combined_search_results}]\n"
@@ -155,8 +153,7 @@ def search(raw_query: str, user_id: str, limit: int = 100) -> str:
 def search_for_memories(query: str):
     """
     Use the tool to search for memories and related graph data.
-    Your task is to create the most effective query string for the given user question.
-    This query string will be used to search for relevant documents in an Graph DB and Vector index.
+    Provide the optimized search query for vector database searches.
     """
     print(f"Invoking: `search_for_memories` with `{{'query': '{query}'}}`")
     print(f"input data: {query}")
