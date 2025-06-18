@@ -28,10 +28,10 @@ def validate_core_configuration() -> List[Dict[str, str]]:
             })
     elif provider == 'togetherai':
         missing = []
-        if not app_env.TOGETHERAI_API_KEY:
-            missing.append('TOGETHERAI_API_KEY')
-        if not app_env.TOGETHERAI_LLM_MODEL:
-            missing.append('TOGETHERAI_LLM_MODEL')
+        if not app_env.TOGETHER_AI_API_KEY:
+            missing.append('TOGETHER_AI_API_KEY')
+        if not app_env.TOGETHER_AI_LLM_MODEL:
+            missing.append('TOGETHER_AI_LLM_MODEL')
         if missing:
             issues.append({
                 'message': f"TogetherAI provider selected but missing: {', '.join(missing)}.",
@@ -107,7 +107,7 @@ def validate_core_configuration() -> List[Dict[str, str]]:
                 'fix': "Add the missing Pinecone vars to your .env."
             })
     elif provider == 'ollama':
-        if not app_env.OLLAMA_API_BASE or not app_env.OLLAMA_EMBEDDING_MODEL:
+        if not app_env.OLLAMA_BASE_URL or not app_env.OLLAMA_EMBEDDING_MODEL:
             issues.append({
                 'message': "Ollama embedding provider selected but OLLAMA_BASE_URL or OLLAMA_EMBEDDING_MODEL is missing.",
                 'details': "Set OLLAMA_BASE_URL orOLLAMA_EMBEDDING_MODEL in your .env.",
