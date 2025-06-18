@@ -8,9 +8,9 @@ from pydantic import BaseModel, Field
 from langchain.schema import AIMessage, HumanMessage
 from langchain_core.utils.function_calling import convert_to_openai_function
 
-from app.app_env import app_env
+from app.config.app_env import app_env
 from app.adapters.llm_adapter import search_llm_provider
-from app.agent_prompts.custom_prompt import system_prompt
+from app.agent_prompts.default_prompt import system_prompt
 from app.utils.get_current_date import get_current_datetime_cranford
 
 from app.tools.search.search_tool import SearchForMemoryItemsTool
@@ -41,7 +41,7 @@ prompt = ChatPromptTemplate.from_messages(
             ---
             Current date and time in Cranford, NJ: {get_current_datetime_cranford()}
             ---
-            Refer to user by user name:  {app_env.APP_USERNAME}
+            Refer to user as: {app_env.APP_USERNAME.capitalize()}
             """
         ),
         MessagesPlaceholder(variable_name="chat_history"),

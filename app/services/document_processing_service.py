@@ -6,12 +6,12 @@ from llmsherpa.readers import LayoutPDFReader
 
 from app.services.pdf_processing_service import upload_file_to_gcs
 from app.adapters.embedder_adapter import embedder
-from app.app_env import app_env
+from app.config.app_env import app_env
 
 # Neo4j configuration
 NEO4J_URL = app_env.NEO4J_URL
 NEO4J_USER = app_env.NEO4J_USER
-NEO4J_PASSWORD = app_env.NEO4J_PWD
+NEO4J_PASSWORD = app_env.NEO4J_PWD.get_secret_value()
 NEO4J_DATABASE = "neo4j"
 
 

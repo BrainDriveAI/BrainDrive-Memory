@@ -109,14 +109,18 @@ def add_entities(to_be_added, user_id, entity_type_map):
         if not destination_node_search_result and source_node_search_result:
             cypher = f"""
                 MATCH (source)
-                WHERE elementId(source) = $source_id
+                    WHERE elementId(source) = $source_id
                 MERGE (destination:{destination_type}:Entity {{name: $destination_name, user_id: $user_id}})
-                ON CREATE SET
-                    destination.created = timestamp(),
-                    destination.embedding = $destination_embedding
+                    ON CREATE SET
+                        destination.created_at = timestamp(),
+                        destination.updated_at = timestamp(),
+                        destination.embedding = $destination_embedding
                 MERGE (source)-[r:{relationship}]->(destination)
-                ON CREATE SET 
-                    r.created = timestamp()
+                    ON CREATE SET
+                        r.created_at = timestamp(),
+                        r.updated_at = timestamp()
+                    ON MATCH SET
+                        r.updated_at = timestamp()
                 RETURN source.name AS source, type(r) AS relationship, destination.name AS target
                 """
 
@@ -134,14 +138,18 @@ def add_entities(to_be_added, user_id, entity_type_map):
         elif destination_node_search_result and not source_node_search_result:
             cypher = f"""
                 MATCH (destination)
-                WHERE elementId(destination) = $destination_id
+                    WHERE elementId(destination) = $destination_id
                 MERGE (source:{source_type}:Entity {{name: $source_name, user_id: $user_id}})
-                ON CREATE SET
-                    source.created = timestamp(),
-                    source.embedding = $source_embedding
+                    ON CREATE SET
+                        source.created_at = timestamp(),
+                        source.updated_at = timestamp(),
+                        source.embedding = $source_embedding
                 MERGE (source)-[r:{relationship}]->(destination)
-                ON CREATE SET 
-                    r.created = timestamp()
+                    ON CREATE SET 
+                        r.created_at = timestamp(),
+                        r.updated_at = timestamp()
+                    ON MATCH SET
+                        r.updated_at = timestamp()
                 RETURN source.name AS source, type(r) AS relationship, destination.name AS target
                 """
 
@@ -159,13 +167,15 @@ def add_entities(to_be_added, user_id, entity_type_map):
         elif source_node_search_result and destination_node_search_result:
             cypher = f"""
                 MATCH (source)
-                WHERE elementId(source) = $source_id
+                    WHERE elementId(source) = $source_id
                 MATCH (destination)
-                WHERE elementId(destination) = $destination_id
+                    WHERE elementId(destination) = $destination_id
                 MERGE (source)-[r:{relationship}]->(destination)
-                ON CREATE SET 
-                    r.created_at = timestamp(),
-                    r.updated_at = timestamp()
+                    ON CREATE SET 
+                        r.created_at = timestamp(),
+                        r.updated_at = timestamp()
+                    ON MATCH SET
+                        r.updated_at = timestamp()
                 RETURN source.name AS source, type(r) AS relationship, destination.name AS target
                 """
             params = {
@@ -180,13 +190,27 @@ def add_entities(to_be_added, user_id, entity_type_map):
         elif not source_node_search_result and not destination_node_search_result:
             cypher = f"""
                 MERGE (n:{source_type}:Entity {{name: $source_name, user_id: $user_id}})
-                ON CREATE SET n.created = timestamp(), n.embedding = $source_embedding
-                ON MATCH SET n.embedding = $source_embedding
+                    ON CREATE SET
+                        n.created_at = timestamp(),
+                        n.updated_at = timestamp(),
+                        n.embedding = $source_embedding
+                    ON MATCH SET
+                        n.updated_at = timestamp(),
+                        n.embedding = $source_embedding
                 MERGE (m:{destination_type}:Entity {{name: $dest_name, user_id: $user_id}})
-                ON CREATE SET m.created = timestamp(), m.embedding = $dest_embedding
-                ON MATCH SET m.embedding = $dest_embedding
+                    ON CREATE SET
+                        m.created_at = timestamp(),
+                        m.updated_at = timestamp(),
+                        m.embedding = $dest_embedding
+                    ON MATCH SET
+                        m.updated_at = timestamp(),
+                        m.embedding = $dest_embedding
                 MERGE (n)-[rel:{relationship}]->(m)
-                ON CREATE SET rel.created = timestamp()
+                    ON CREATE SET
+                        rel.created_at = timestamp(),
+                        rel.updated_at = timestamp()
+                    ON MATCH SET
+                        rel.updated_at = timestamp()
                 RETURN n.name AS source, type(rel) AS relationship, m.name AS target
                 """
             params = {

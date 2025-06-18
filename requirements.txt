@@ -33,7 +33,7 @@ google-api-python-client==2.166.0
 google-auth==2.38.0
 google-auth-httplib2==0.2.0
 google-auth-oauthlib==1.2.1
-google-cloud-aiplatform
+google-cloud-aiplatform==1.71.1
 google-cloud-bigquery==3.31.0
 google-cloud-core==2.4.3
 google-cloud-discoveryengine==0.11.14
@@ -54,7 +54,7 @@ hpack==4.1.0
 httpcore==1.0.7
 httplib2==0.22.0
 httptools==0.6.4
-httpx
+httpx==0.27.2
 httpx-sse==0.4.0
 huggingface-hub==0.28.0
 hyperframe==6.1.0
@@ -71,7 +71,7 @@ langchain==0.3.17
 langchain-community==0.3.16
 langchain-core==0.3.49
 langchain-google-community==2.0.7
-langchain-google-vertexai
+langchain-google-vertexai==2.0.7
 langchain-groq==0.2.3
 langchain-neo4j==0.2.0
 langchain-ollama==0.2.2
@@ -81,8 +81,9 @@ langchain-postgres==0.0.12
 langchain-tests==0.3.10
 langchain-text-splitters==0.3.5
 langchain-together==0.3.0
-langgraph==0.2.63
-langgraph-checkpoint==2.0.10
+langgraph==0.4.7
+langgraph-checkpoint==2.0.26
+langgraph-prebuilt==0.2.2
 langgraph-sdk==0.1.51
 langsmith==0.2.11
 llmsherpa==0.1.4
@@ -97,11 +98,13 @@ mypy-extensions==1.0.0
 narwhals==1.22.0
 neo4j==5.27.0
 networkx==3.4.2
+nltk==3.9.1
 numpy==1.26.4
 oauthlib==3.2.2
 ollama==0.4.6
 openai==1.59.7
 orjson==3.10.14
+ormsgpack==1.10.0
 packaging==24.2
 pandas==2.2.3
 pgvector==0.2.5
@@ -151,6 +154,7 @@ safetensors==0.5.2
 scikit-learn==1.6.1
 scipy==1.15.1
 sentence-transformers==3.4.1
+setuptools==80.8.0
 shapely==2.0.7
 shellingham==1.5.4
 six==1.17.0
@@ -184,8 +188,9 @@ uritemplate==4.1.1
 urllib3==2.3.0
 uvicorn==0.34.0
 validators==0.34.0
-vertexai
+vertexai==1.71.1
 watchdog==6.0.0
 watchfiles==1.0.4
 websockets==12.0
+xxhash==3.5.0
 yarl==1.18.3

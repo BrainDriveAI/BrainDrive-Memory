@@ -1,7 +1,7 @@
 from app.tools.shared_utils.retrieve_nodes_from_data import retrieve_nodes_from_data
 from app.tools.shared_utils.establish_nodes_relations_from_data import establish_nodes_relations_from_data
 from app.tools.add.add_entities import add_entities
-from app.app_env import app_env
+from app.config.app_env import app_env
 from app.data_source_manager import get_vector_store_instance
 
 from typing import Optional, Type

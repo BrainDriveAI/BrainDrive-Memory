@@ -1,4 +1,4 @@
-from app.app_env import app_env
+from app.config.app_env import app_env
 from typing import Any, Dict, List, Optional
 
 try:

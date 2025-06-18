@@ -22,15 +22,19 @@ def update_graph(update_type: UpdateType, id_value: str, new_value: str, user_id
     if update_type == "source":
         query = """
         MATCH (n)
-        WHERE elementId(n) = $id_value AND n.user_id = $user_id
-        SET n.name = $new_value
+            WHERE elementId(n) = $id_value AND n.user_id = $user_id
+        SET
+            n.name = $new_value,
+            n.updated_at = timestamp()
         RETURN n
         """
     elif update_type == "relationship":
         query = """
         MATCH ()-[r]->()
-        WHERE elementId(r) = $id_value
-        SET r.type = $new_value
+            WHERE elementId(r) = $id_value
+        SET
+            r.type = $new_value,
+            r.updated_at = timestamp()
         RETURN r
         """
     else:

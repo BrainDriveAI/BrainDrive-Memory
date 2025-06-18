@@ -3,7 +3,7 @@ import os
 import PyPDF2
 from google.cloud import storage
 from neo4j import GraphDatabase
-from app.app_env import app_env
+from app.config.app_env import app_env
 
 SERVICE_ACCOUNT_FILE = os.path.join(os.path.dirname(__file__), "service_account.json")
 

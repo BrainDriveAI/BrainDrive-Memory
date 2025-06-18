@@ -32,13 +32,29 @@ CALL db.index.vector.queryNodes('entity_embedding_index', $neighboursPerEmb, $n_
 YIELD node AS n, score AS similarity
 WHERE n.user_id = $user_id AND similarity >= $threshold
 MATCH (n)-[r]->(m)
-RETURN n.name AS source, elementId(n) AS source_id, type(r) AS relationship, elementId(r) AS relation_id, m.name AS destination, elementId(m) AS destination_id, similarity
+RETURN n.name AS source,
+    elementId(n) AS source_id,
+    type(r) AS relationship,
+    elementId(r) AS relation_id,
+    m.name AS destination,
+    elementId(m) AS destination_id,
+    r.created_at  AS created_at,
+    r.updated_at  AS updated_at,
+    similarity
 UNION
 CALL db.index.vector.queryNodes('entity_embedding_index', $neighboursPerEmb, $n_embedding) 
 YIELD node AS n, score AS similarity
 WHERE n.user_id = $user_id AND similarity >= $threshold
 MATCH (m)-[r]->(n)
-RETURN m.name AS source, elementId(m) AS source_id, type(r) AS relationship, elementId(r) AS relation_id, n.name AS destination, elementId(n) AS destination_id, similarity
+RETURN m.name AS source,
+    elementId(m) AS source_id,
+    type(r) AS relationship,
+    elementId(r) AS relation_id,
+    n.name AS destination,
+    elementId(n) AS destination_id,
+    r.created_at  AS created_at,
+    r.updated_at  AS updated_at,
+    similarity
 ORDER BY similarity DESC
 LIMIT $limit
 """
@@ -72,7 +88,7 @@ def search_graph_db(node_list, user_id, limit=10):
     """Search similar nodes among and their respective incoming and outgoing relations."""
     start_time = time.time()
     
-    threshold = 0.8
+    threshold = 0.9
     result_relations = []
     print(f"Node list: ${node_list}")
 
@@ -81,7 +97,7 @@ def search_graph_db(node_list, user_id, limit=10):
         "neighboursPerEmb": limit * 2,
         "limit": limit,
         "user_id": user_id,
-        "threshold": 0.8
+        "threshold": threshold
     }
     graph_db_service = get_graph_db_instance()
     result_relations = graph_db_service.query(batch_cypher_query, params=params)
@@ -91,16 +107,16 @@ def search_graph_db(node_list, user_id, limit=10):
     return result_relations
 
 
-def search_graph_db_by_query(query: str, user_id: str, limit=20):
+def search_graph_db_by_query(query: str, user_id: str, limit=5):
     """Search similar nodes among and their respective incoming and outgoing relations."""
     start_time = time.time()
     
-    threshold = 0.7
+    threshold = 0.8
     result_relations = []
 
     params = {
         "n_embedding": embedder.embed_query(query),
-        "neighboursPerEmb": limit * 2,
+        "neighboursPerEmb": limit * 1,
         "limit": limit,
         "user_id": user_id,
         "threshold": threshold

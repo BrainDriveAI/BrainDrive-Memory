@@ -1,6 +1,6 @@
 from app.logger import app_logger as logger
 from app.data_source_manager import get_graph_db_instance
-from app.app_env import app_env
+from app.config.app_env import app_env
 
 from typing import Optional, Type
 

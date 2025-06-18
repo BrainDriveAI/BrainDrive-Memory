@@ -2,7 +2,8 @@ import json
 import time
 import concurrent.futures
 from app.tools.shared_utils.search_graph_db import search_graph_db_by_query
-from app.app_env import app_env
+from app.tools.shared_utils.rerank_graph_results import rerank_graph_results
+from app.config.app_env import app_env
 from typing import Optional, Type
 from langchain_core.tools import tool
 from app.data_source_manager import get_vector_store_instance
@@ -14,13 +15,14 @@ from langchain.callbacks.manager import (
 from pydantic import BaseModel, Field
 from langchain.tools import BaseTool
 
+from app.tools.search.query_rewriter import analyze_and_generate_queries
 
-def search(query: str, user_id: str, limit: int = 100) -> str:
+def search(raw_query: str, user_id: str, limit: int = 100) -> str:
     """
     Search for memories and related graph data in parallel.
     
     Args:
-        query (str): Query to search for.
+        raw_query (str): Query to search for.
         user_id (str): Username to search for.
         limit (int): The maximum number of nodes and relationships to retrieve. Defaults to 100.
         
@@ -28,6 +30,11 @@ def search(query: str, user_id: str, limit: int = 100) -> str:
         str: A formatted string containing search results from different sources.
     """
     overall_start_time = time.time()
+    strategic_queries = analyze_and_generate_queries(raw_query)
+
+    # Option 1: Direct indexing
+    query = strategic_queries[0]
+
     print(f"Starting search for query: '{query}'")
     
     # Define the search functions to run in parallel
@@ -35,7 +42,7 @@ def search(query: str, user_id: str, limit: int = 100) -> str:
         try:
             vector_store_service = get_vector_store_instance()
             vector_start_time = time.time()
-            results = vector_store_service.hybrid_search(query, {"user_id": app_env.APP_USERNAME})
+            results = vector_store_service.hybrid_search(query, {"user_id": user_id})
             vector_time = time.time() - vector_start_time
             print(f"Vector search completed in {vector_time:.3f}s")
             return results
@@ -84,6 +91,9 @@ def search(query: str, user_id: str, limit: int = 100) -> str:
                     "source_id": item["source_id"],
                     "relation_id": item["relation_id"],
                     "destination_id": item["destination_id"],
+                    "created_at": item["created_at"],
+                    "updated_at": item["updated_at"],
+                    "similarity": item["similarity"]
                 })
             process_time = time.time() - process_start
             
@@ -117,9 +127,14 @@ def search(query: str, user_id: str, limit: int = 100) -> str:
     
     # Format the results
     format_start = time.time()
+    # NEW: immediately post-process the graph hits
+    keyword_search_results = rerank_graph_results(search_results, query)
+    
     combined_search_results = json.dumps(search_results) if len(search_results) else ""
     
     final_output = (
+        f"**Keyword search:** [{keyword_search_results}]\n"
+        f"___\n"
         f"**Knowledge graph data:** [{combined_search_results}]\n"
         f"___\n"
         f"**Vector store data:** [{vector_search_results}]\n"
@@ -138,7 +153,11 @@ def search(query: str, user_id: str, limit: int = 100) -> str:
 
 @tool
 def search_for_memories(query: str):
-    """Use the tool to search for memories and related graph data. Pass in detailed query to search for."""
+    """
+    Use the tool to search for memories and related graph data.
+    Your task is to create the most effective query string for the given user question.
+    This query string will be used to search for relevant documents in an Graph DB and Vector index.
+    """
     print(f"Invoking: `search_for_memories` with `{{'query': '{query}'}}`")
     print(f"input data: {query}")
     return search(query, app_env.APP_USERNAME)
